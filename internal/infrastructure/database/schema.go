@@ -34,18 +34,39 @@ func NewDB(dbPath string) (*DB, error) {
 }
 
 func (db *DB) migrate() error {
-	query := `
-	CREATE TABLE IF NOT EXISTS projects (
-		id TEXT PRIMARY KEY,
-		slug TEXT UNIQUE NOT NULL,
-		name TEXT NOT NULL,
-		created_at DATETIME NOT NULL,
-		updated_at DATETIME NOT NULL
-	);
-	`
+	queries := []string{
+		`
+		CREATE TABLE IF NOT EXISTS projects (
+			id TEXT PRIMARY KEY,
+			slug TEXT UNIQUE NOT NULL,
+			name TEXT NOT NULL,
+			created_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL
+		);
+		`,
+		`
+		CREATE TABLE IF NOT EXISTS access (
+			id TEXT PRIMARY KEY,
+			project_id TEXT NOT NULL,
+			uid TEXT NOT NULL,
+			pin TEXT NOT NULL,
+			name TEXT NOT NULL,
+			readonly BOOLEAN NOT NULL DEFAULT 0,
+			created_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL,
+			FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
+			UNIQUE (project_id, uid)
+		);
+		`,
+	}
 
-	_, err := db.conn.Exec(query)
-	return err
+	for _, query := range queries {
+		if _, err := db.conn.Exec(query); err != nil {
+			return fmt.Errorf("failed to execute migration: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func (db *DB) Close() error {
