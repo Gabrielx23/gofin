@@ -7,6 +7,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type Database interface {
+	Close() error
+}
+
 type DB struct {
 	conn *sql.DB
 }

@@ -36,7 +36,7 @@ func createProject() error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize container: %w", err)
 	}
-	defer container.Close()
+	defer container.DB.Close()
 
 	project, err := container.CreateProjectService.CreateProject(projectName, projectSlug)
 	if err != nil {

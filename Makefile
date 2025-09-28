@@ -1,4 +1,4 @@
-.PHONY: build run clean test deps check ci
+.PHONY: build run clean test deps check ci format
 
 # Build the CLI
 build:
@@ -26,6 +26,10 @@ test:
 # Run tests with coverage
 test-coverage:
 	go test -v -race -coverprofile=coverage.out ./...
+
+# Format code
+format:
+	go fmt ./...
 
 # Check formatting
 check-format:

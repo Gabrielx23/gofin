@@ -1,4 +1,4 @@
-package createproject
+package create_project
 
 import (
 	"fmt"
@@ -8,27 +8,12 @@ import (
 	"gofin/internal/models"
 )
 
-type testContainer struct {
-	ProjectRepository    models.ProjectRepository
-	CreateProjectService *CreateProjectService
-}
-
-func newTestContainer() *testContainer {
-	projectRepo := database.NewProjectInMemoryRepository()
-	createProjectService := NewCreateProjectService(projectRepo)
-
-	return &testContainer{
-		ProjectRepository:    projectRepo,
-		CreateProjectService: createProjectService,
-	}
-}
-
 func TestCreateProjectService_CreateProject(t *testing.T) {
 	tests := []struct {
 		name        string
 		projectName string
 		customSlug  string
-		repoSetup   func(*testContainer)
+		repoSetup   func(models.ProjectRepository)
 		wantErr     bool
 		wantSlug    string
 	}{
@@ -36,7 +21,7 @@ func TestCreateProjectService_CreateProject(t *testing.T) {
 			name:        "success with auto-generated slug",
 			projectName: "My Test Project",
 			customSlug:  "",
-			repoSetup:   func(c *testContainer) {},
+			repoSetup:   func(r models.ProjectRepository) {},
 			wantErr:     false,
 			wantSlug:    "my-test-project",
 		},
@@ -44,7 +29,7 @@ func TestCreateProjectService_CreateProject(t *testing.T) {
 			name:        "success with custom slug",
 			projectName: "My Test Project",
 			customSlug:  "custom-slug",
-			repoSetup:   func(c *testContainer) {},
+			repoSetup:   func(r models.ProjectRepository) {},
 			wantErr:     false,
 			wantSlug:    "custom-slug",
 		},
@@ -52,23 +37,23 @@ func TestCreateProjectService_CreateProject(t *testing.T) {
 			name:        "error when name is empty",
 			projectName: "",
 			customSlug:  "",
-			repoSetup:   func(c *testContainer) {},
+			repoSetup:   func(r models.ProjectRepository) {},
 			wantErr:     true,
 		},
 		{
 			name:        "error when custom slug is invalid",
 			projectName: "My Test Project",
 			customSlug:  "Invalid_Slug",
-			repoSetup:   func(c *testContainer) {},
+			repoSetup:   func(r models.ProjectRepository) {},
 			wantErr:     true,
 		},
 		{
 			name:        "error when slug already exists",
 			projectName: "My Test Project",
 			customSlug:  "existing-slug",
-			repoSetup: func(c *testContainer) {
+			repoSetup: func(r models.ProjectRepository) {
 				existingProject := models.NewProject("Existing Project", "existing-slug")
-				c.ProjectRepository.Create(existingProject)
+				r.Create(existingProject)
 			},
 			wantErr: true,
 		},
@@ -76,10 +61,11 @@ func TestCreateProjectService_CreateProject(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			testContainer := newTestContainer()
-			tt.repoSetup(testContainer)
+			repository := database.NewProjectInMemoryRepository()
+			service := NewCreateProjectService(repository)
+			tt.repoSetup(repository)
 
-			project, err := testContainer.CreateProjectService.CreateProject(tt.projectName, tt.customSlug)
+			project, err := service.CreateProject(tt.projectName, tt.customSlug)
 
 			if tt.wantErr {
 				if err == nil {
@@ -147,14 +133,15 @@ func TestCreateProjectService_ensureUniqueSlug(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			testContainer := newTestContainer()
+			repository := database.NewProjectInMemoryRepository()
+			service := NewCreateProjectService(repository)
 
 			for _, slug := range tt.existingSlugs {
 				project := models.NewProject("Test Project", slug)
-				testContainer.ProjectRepository.Create(project)
+				repository.Create(project)
 			}
 
-			slug, err := testContainer.CreateProjectService.ensureUniqueSlug(tt.baseSlug)
+			slug, err := service.ensureUniqueSlug(tt.baseSlug)
 
 			if tt.wantErr {
 				if err == nil {
@@ -176,8 +163,6 @@ func TestCreateProjectService_ensureUniqueSlug(t *testing.T) {
 }
 
 func TestCreateProjectService_determineSlug(t *testing.T) {
-	testContainer := newTestContainer()
-
 	tests := []struct {
 		name        string
 		projectName string
@@ -209,7 +194,9 @@ func TestCreateProjectService_determineSlug(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			slug, err := testContainer.CreateProjectService.determineSlug(tt.projectName, tt.customSlug)
+			repository := database.NewProjectInMemoryRepository()
+			service := NewCreateProjectService(repository)
+			slug, err := service.determineSlug(tt.projectName, tt.customSlug)
 
 			if tt.wantErr {
 				if err == nil {

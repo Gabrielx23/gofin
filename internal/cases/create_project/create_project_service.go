@@ -1,4 +1,4 @@
-package createproject
+package create_project
 
 import (
 	"fmt"

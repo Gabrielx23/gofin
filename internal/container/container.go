@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"gofin/internal/cases/create-project"
+	"gofin/internal/cases/create_project"
 	"gofin/internal/infrastructure/database"
 	"gofin/internal/models"
 )
 
 type Container struct {
-	DB                   *database.DB
 	ProjectRepository    models.ProjectRepository
-	CreateProjectService *createproject.CreateProjectService
+	CreateProjectService *create_project.CreateProjectService
+	DB                   database.Database
 }
 
 func NewContainer(dbPath string) (*Container, error) {
@@ -22,19 +22,15 @@ func NewContainer(dbPath string) (*Container, error) {
 	}
 
 	projectRepo := database.NewProjectSqliteRepository(db.GetConnection())
-	createProjectService := createproject.NewCreateProjectService(projectRepo)
+	createProjectService := create_project.NewCreateProjectService(projectRepo)
 
 	return &Container{
-		DB:                   db,
 		ProjectRepository:    projectRepo,
 		CreateProjectService: createProjectService,
+		DB:                   db,
 	}, nil
 }
 
 func NewContainerWithDefaultConfig() (*Container, error) {
 	return NewContainer(filepath.Join(".", "database.db"))
-}
-
-func (c *Container) Close() error {
-	return c.DB.Close()
 }
