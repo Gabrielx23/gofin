@@ -7,18 +7,21 @@ import (
 	"gofin/internal/cases/create_access"
 	"gofin/internal/cases/create_account"
 	"gofin/internal/cases/create_project"
+	"gofin/internal/cases/create_transaction"
 	"gofin/internal/infrastructure/database"
 	"gofin/internal/models"
 )
 
 type Container struct {
-	ProjectRepository    models.ProjectRepository
-	AccessRepository     models.AccessRepository
-	AccountRepository    models.AccountRepository
-	CreateProjectService *create_project.CreateProjectService
-	CreateAccessService  *create_access.CreateAccessService
-	CreateAccountService *create_account.CreateAccountService
-	DB                   database.Database
+	ProjectRepository        models.ProjectRepository
+	AccessRepository         models.AccessRepository
+	AccountRepository        models.AccountRepository
+	TransactionRepository    models.TransactionRepository
+	CreateProjectService     *create_project.CreateProjectService
+	CreateAccessService      *create_access.CreateAccessService
+	CreateAccountService     *create_account.CreateAccountService
+	CreateTransactionService *create_transaction.CreateTransactionService
+	DB                       database.Database
 }
 
 func NewContainer(dbPath string) (*Container, error) {
@@ -30,18 +33,22 @@ func NewContainer(dbPath string) (*Container, error) {
 	projectRepo := database.NewProjectSqliteRepository(db.GetConnection())
 	accessRepo := database.NewAccessSqliteRepository(db.GetConnection())
 	accountRepo := database.NewAccountSqliteRepository(db.GetConnection())
+	transactionRepo := database.NewTransactionSqliteRepository(db.GetConnection())
 	createProjectService := create_project.NewCreateProjectService(projectRepo)
 	createAccessService := create_access.NewCreateAccessService(accessRepo, projectRepo)
 	createAccountService := create_account.NewCreateAccountService(accountRepo, projectRepo)
+	createTransactionService := create_transaction.NewCreateTransactionService(transactionRepo, accountRepo)
 
 	return &Container{
-		ProjectRepository:    projectRepo,
-		AccessRepository:     accessRepo,
-		AccountRepository:    accountRepo,
-		CreateProjectService: createProjectService,
-		CreateAccessService:  createAccessService,
-		CreateAccountService: createAccountService,
-		DB:                   db,
+		ProjectRepository:        projectRepo,
+		AccessRepository:         accessRepo,
+		AccountRepository:        accountRepo,
+		TransactionRepository:    transactionRepo,
+		CreateProjectService:     createProjectService,
+		CreateAccessService:      createAccessService,
+		CreateAccountService:     createAccountService,
+		CreateTransactionService: createTransactionService,
+		DB:                       db,
 	}, nil
 }
 
