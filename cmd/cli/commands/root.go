@@ -20,6 +20,7 @@ func Execute() error {
 func init() {
 	rootCmd.AddCommand(createProjectCmd)
 	rootCmd.AddCommand(createAccessCmd)
+	rootCmd.AddCommand(createAccountCmd)
 }
 
 func exitWithError(err error) {

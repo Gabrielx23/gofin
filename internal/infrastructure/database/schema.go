@@ -58,6 +58,18 @@ func (db *DB) migrate() error {
 			UNIQUE (project_id, uid)
 		);
 		`,
+		`
+		CREATE TABLE IF NOT EXISTS accounts (
+			id TEXT PRIMARY KEY,
+			project_id TEXT NOT NULL,
+			name TEXT NOT NULL,
+			currency TEXT NOT NULL,
+			created_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL,
+			FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
+			UNIQUE (project_id, name)
+		);
+		`,
 	}
 
 	for _, query := range queries {
