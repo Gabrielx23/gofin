@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -16,6 +17,7 @@ var (
 	transactionValue     string
 	transactionName      string
 	transactionType      string
+	transactionDate      string
 	transactionGroup     string
 )
 
@@ -36,7 +38,8 @@ func init() {
 	createTransactionCmd.Flags().StringVarP(&transactionValue, "value", "v", "", "Transaction value (required for single transaction)")
 	createTransactionCmd.Flags().StringVarP(&transactionName, "name", "n", "", "Transaction name (required for single transaction)")
 	createTransactionCmd.Flags().StringVarP(&transactionType, "type", "t", "", "Transaction type: debit or top-up (required for single transaction)")
-	createTransactionCmd.Flags().StringVarP(&transactionGroup, "group", "g", "", "Group transactions together (optional, format: 'account1:value1:name1:type1,account2:value2:name2:type2')")
+	createTransactionCmd.Flags().StringVarP(&transactionDate, "date", "d", "", "Transaction date (optional, format: 2006-01-02 15:04:05 or 2006-01-02)")
+	createTransactionCmd.Flags().StringVarP(&transactionGroup, "group", "g", "", "Group transactions together (optional, format: 'account1:value1:name1:type1:date1,account2:value2:name2:type2:date2')")
 }
 
 func createTransaction() error {
@@ -73,7 +76,24 @@ func createSingleTransaction(container *container.Container) error {
 		return fmt.Errorf("invalid transaction type: %w", err)
 	}
 
-	transaction, err := container.CreateTransactionService.CreateSingleTransaction(accountID, value, transactionName, transactionType)
+	var parsedTransactionDate *time.Time
+	if transactionDate != "" {
+		parsedDate, err := parseTransactionDate(transactionDate)
+		if err != nil {
+			return fmt.Errorf("invalid transaction date: %w", err)
+		}
+		parsedTransactionDate = &parsedDate
+	}
+
+	data := models.TransactionData{
+		AccountID:       accountID,
+		Value:           value,
+		Name:            transactionName,
+		Type:            transactionType,
+		TransactionDate: parsedTransactionDate,
+	}
+
+	transaction, err := container.CreateTransactionService.CreateSingleTransactionFromData(data)
 	if err != nil {
 		return err
 	}
@@ -121,8 +141,8 @@ func parseGroupedTransactions(groupStr string) ([]models.TransactionData, error)
 
 	for i, part := range parts {
 		fields := strings.Split(part, ":")
-		if len(fields) != 4 {
-			return nil, fmt.Errorf("transaction %d must have format 'account:value:name:type'", i+1)
+		if len(fields) < 4 || len(fields) > 5 {
+			return nil, fmt.Errorf("transaction %d must have format 'account:value:name:type[:date]'", i+1)
 		}
 
 		accountID, err := parseUUID(fields[0])
@@ -140,11 +160,21 @@ func parseGroupedTransactions(groupStr string) ([]models.TransactionData, error)
 			return nil, fmt.Errorf("invalid transaction type in transaction %d: %w", i+1, err)
 		}
 
+		var transactionDate *time.Time
+		if len(fields) == 5 && fields[4] != "" {
+			parsedDate, err := parseTransactionDate(fields[4])
+			if err != nil {
+				return nil, fmt.Errorf("invalid transaction date in transaction %d: %w", i+1, err)
+			}
+			transactionDate = &parsedDate
+		}
+
 		transactions = append(transactions, models.TransactionData{
-			AccountID: accountID,
-			Value:     value,
-			Name:      fields[2],
-			Type:      transactionType,
+			AccountID:       accountID,
+			Value:           value,
+			Name:            fields[2],
+			Type:            transactionType,
+			TransactionDate: transactionDate,
 		})
 	}
 
@@ -153,4 +183,23 @@ func parseGroupedTransactions(groupStr string) ([]models.TransactionData, error)
 
 func parseUUID(s string) (uuid.UUID, error) {
 	return uuid.Parse(s)
+}
+
+func parseTransactionDate(dateStr string) (time.Time, error) {
+	formats := []string{
+		"2006-01-02 15:04:05",
+		"2006-01-02T15:04:05",
+		"2006-01-02 15:04",
+		"2006-01-02",
+		"2006/01/02 15:04:05",
+		"2006/01/02",
+	}
+
+	for _, format := range formats {
+		if t, err := time.Parse(format, dateStr); err == nil {
+			return t, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("unable to parse date '%s', expected formats: 2006-01-02 15:04:05, 2006-01-02, etc.", dateStr)
 }

@@ -2,6 +2,7 @@ package create_transaction
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"gofin/internal/models"
@@ -94,6 +95,20 @@ func (s *CreateTransactionService) validateTransactionData(data models.Transacti
 
 	if !data.Type.IsValid() {
 		return fmt.Errorf("invalid transaction type: %s", data.Type)
+	}
+
+	if data.TransactionDate == nil {
+		return nil
+	}
+
+	now := time.Now()
+	if data.TransactionDate.After(now) {
+		return fmt.Errorf("transaction date cannot be in the future")
+	}
+
+	tenYearsAgo := now.AddDate(-10, 0, 0)
+	if data.TransactionDate.Before(tenYearsAgo) {
+		return fmt.Errorf("transaction date cannot be more than 10 years in the past")
 	}
 
 	return nil

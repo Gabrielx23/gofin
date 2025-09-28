@@ -10,7 +10,7 @@ type Access struct {
 	ID        uuid.UUID `json:"id" db:"id"`
 	ProjectID uuid.UUID `json:"project_id" db:"project_id"`
 	UID       string    `json:"uid" db:"uid"`
-	PIN       string    `json:"-" db:"pin"` // Hidden from JSON, stored as hash
+	PIN       string    `json:"-" db:"pin"`
 	Name      string    `json:"name" db:"name"`
 	ReadOnly  bool      `json:"readonly" db:"readonly"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`

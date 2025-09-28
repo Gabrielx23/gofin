@@ -123,9 +123,10 @@ func (r *TransactionSqliteRepository) GetByID(id uuid.UUID) (*models.Transaction
 func (r *TransactionSqliteRepository) scanTransaction(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*models.Transaction, error) {
-	var id, accountID, name, transactionType, groupIDStr string
+	var id, accountID, name, transactionType string
 	var value float64
 	var transactionDate, createdAt, updatedAt time.Time
+	var groupIDStr sql.NullString
 
 	err := scanner.Scan(&id, &accountID, &value, &name, &transactionDate, &transactionType, &groupIDStr, &createdAt, &updatedAt)
 	if err != nil {
@@ -151,8 +152,8 @@ func (r *TransactionSqliteRepository) scanTransaction(scanner interface {
 	}
 
 	var groupID *uuid.UUID
-	if groupIDStr != "" {
-		groupUUID, err := uuid.Parse(groupIDStr)
+	if groupIDStr.Valid && groupIDStr.String != "" {
+		groupUUID, err := uuid.Parse(groupIDStr.String)
 		if err != nil {
 			return nil, fmt.Errorf("invalid group ID: %w", err)
 		}
@@ -170,4 +171,89 @@ func (r *TransactionSqliteRepository) scanTransaction(scanner interface {
 		CreatedAt:       createdAt,
 		UpdatedAt:       updatedAt,
 	}, nil
+}
+
+func (r *TransactionSqliteRepository) GetByAccountIDWithDateRange(accountID uuid.UUID, startDate, endDate *time.Time) ([]*models.Transaction, error) {
+	query := `
+		SELECT t.id, t.account_id, t.value, t.name, t.transaction_date, t.type, t.group_id, t.created_at, t.updated_at
+		FROM transactions t
+		WHERE t.account_id = ?
+	`
+	args := []interface{}{accountID.String()}
+
+	if startDate != nil {
+		query += " AND t.transaction_date >= ?"
+		args = append(args, *startDate)
+	}
+
+	if endDate != nil {
+		query += " AND t.transaction_date <= ?"
+		args = append(args, *endDate)
+	}
+
+	query += " ORDER BY t.transaction_date ASC"
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query transactions by account_id with date range: %w", err)
+	}
+	defer rows.Close()
+
+	var transactions []*models.Transaction
+	for rows.Next() {
+		transaction, err := r.scanTransaction(rows)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan transaction: %w", err)
+		}
+		transactions = append(transactions, transaction)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating transaction rows: %w", err)
+	}
+
+	return transactions, nil
+}
+
+func (r *TransactionSqliteRepository) GetByProjectIDWithDateRange(projectID uuid.UUID, startDate, endDate *time.Time) ([]*models.Transaction, error) {
+	query := `
+		SELECT t.id, t.account_id, t.value, t.name, t.transaction_date, t.type, t.group_id, t.created_at, t.updated_at
+		FROM transactions t
+		JOIN accounts a ON t.account_id = a.id
+		WHERE a.project_id = ?
+	`
+	args := []interface{}{projectID.String()}
+
+	if startDate != nil {
+		query += " AND t.transaction_date >= ?"
+		args = append(args, *startDate)
+	}
+
+	if endDate != nil {
+		query += " AND t.transaction_date <= ?"
+		args = append(args, *endDate)
+	}
+
+	query += " ORDER BY t.transaction_date ASC"
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query transactions by project_id with date range: %w", err)
+	}
+	defer rows.Close()
+
+	var transactions []*models.Transaction
+	for rows.Next() {
+		transaction, err := r.scanTransaction(rows)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan transaction: %w", err)
+		}
+		transactions = append(transactions, transaction)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating transaction rows: %w", err)
+	}
+
+	return transactions, nil
 }

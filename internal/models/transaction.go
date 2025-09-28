@@ -34,10 +34,11 @@ func ParseTransactionType(s string) (TransactionType, error) {
 }
 
 type TransactionData struct {
-	AccountID uuid.UUID
-	Value     float64
-	Name      string
-	Type      TransactionType
+	AccountID       uuid.UUID
+	Value           float64
+	Name            string
+	Type            TransactionType
+	TransactionDate *time.Time
 }
 
 type Transaction struct {
@@ -57,16 +58,23 @@ type TransactionRepository interface {
 	GetByAccountID(accountID uuid.UUID) ([]*Transaction, error)
 	GetByGroupID(groupID uuid.UUID) ([]*Transaction, error)
 	GetByID(id uuid.UUID) (*Transaction, error)
+	GetByAccountIDWithDateRange(accountID uuid.UUID, startDate, endDate *time.Time) ([]*Transaction, error)
+	GetByProjectIDWithDateRange(projectID uuid.UUID, startDate, endDate *time.Time) ([]*Transaction, error)
 }
 
 func NewTransaction(data TransactionData) *Transaction {
 	now := time.Now()
+	transactionDate := now
+	if data.TransactionDate != nil {
+		transactionDate = *data.TransactionDate
+	}
+
 	return &Transaction{
 		ID:              uuid.New(),
 		AccountID:       data.AccountID,
 		Value:           data.Value,
 		Name:            data.Name,
-		TransactionDate: now,
+		TransactionDate: transactionDate,
 		Type:            data.Type,
 		GroupID:         nil,
 		CreatedAt:       now,
@@ -76,12 +84,17 @@ func NewTransaction(data TransactionData) *Transaction {
 
 func NewGroupedTransaction(data TransactionData, groupID uuid.UUID) *Transaction {
 	now := time.Now()
+	transactionDate := now
+	if data.TransactionDate != nil {
+		transactionDate = *data.TransactionDate
+	}
+
 	return &Transaction{
 		ID:              uuid.New(),
 		AccountID:       data.AccountID,
 		Value:           data.Value,
 		Name:            data.Name,
-		TransactionDate: now,
+		TransactionDate: transactionDate,
 		Type:            data.Type,
 		GroupID:         &groupID,
 		CreatedAt:       now,

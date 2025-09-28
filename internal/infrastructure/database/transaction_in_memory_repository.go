@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"gofin/internal/models"
@@ -70,4 +71,44 @@ func (r *TransactionInMemoryRepository) GetByID(id uuid.UUID) (*models.Transacti
 	}
 
 	return transaction, nil
+}
+
+func (r *TransactionInMemoryRepository) GetByAccountIDWithDateRange(accountID uuid.UUID, startDate, endDate *time.Time) ([]*models.Transaction, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var transactions []*models.Transaction
+	for _, transaction := range r.transactions {
+		if transaction.AccountID == accountID {
+			if r.isTransactionInDateRange(transaction, startDate, endDate) {
+				transactions = append(transactions, transaction)
+			}
+		}
+	}
+
+	return transactions, nil
+}
+
+func (r *TransactionInMemoryRepository) GetByProjectIDWithDateRange(projectID uuid.UUID, startDate, endDate *time.Time) ([]*models.Transaction, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var transactions []*models.Transaction
+	for _, transaction := range r.transactions {
+		if r.isTransactionInDateRange(transaction, startDate, endDate) {
+			transactions = append(transactions, transaction)
+		}
+	}
+
+	return transactions, nil
+}
+
+func (r *TransactionInMemoryRepository) isTransactionInDateRange(transaction *models.Transaction, startDate, endDate *time.Time) bool {
+	if startDate != nil && transaction.TransactionDate.Before(*startDate) {
+		return false
+	}
+	if endDate != nil && transaction.TransactionDate.After(*endDate) {
+		return false
+	}
+	return true
 }

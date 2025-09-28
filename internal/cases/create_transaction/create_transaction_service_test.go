@@ -2,6 +2,7 @@ package create_transaction
 
 import (
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"gofin/internal/infrastructure/database"
@@ -142,8 +143,8 @@ func TestCreateTransactionService_CreateGroupedTransactions(t *testing.T) {
 		{
 			name: "success with multiple transactions",
 			transactions: []models.TransactionData{
-				{AccountID: uuid.New(), Value: 50.0, Name: "Transaction 1", Type: models.Debit},
-				{AccountID: uuid.New(), Value: 100.0, Name: "Transaction 2", Type: models.TopUp},
+				{AccountID: uuid.New(), Value: 50.0, Name: "Transaction 1", Type: models.Debit, TransactionDate: nil},
+				{AccountID: uuid.New(), Value: 100.0, Name: "Transaction 2", Type: models.TopUp, TransactionDate: nil},
 			},
 			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountIDs []uuid.UUID) {
 				account1 := models.NewAccount(uuid.New(), "Account 1", "USD")
@@ -167,7 +168,7 @@ func TestCreateTransactionService_CreateGroupedTransactions(t *testing.T) {
 		{
 			name: "error when account not found",
 			transactions: []models.TransactionData{
-				{AccountID: uuid.New(), Value: 50.0, Name: "Transaction 1", Type: models.Debit},
+				{AccountID: uuid.New(), Value: 50.0, Name: "Transaction 1", Type: models.Debit, TransactionDate: nil},
 			},
 			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountIDs []uuid.UUID) {
 			},
@@ -231,10 +232,11 @@ func TestCreateTransactionService_CreateSingleTransactionFromData(t *testing.T) 
 		{
 			name: "success with debit transaction",
 			data: models.TransactionData{
-				AccountID: uuid.New(),
-				Value:     50.0,
-				Name:      "Grocery Shopping",
-				Type:      models.Debit,
+				AccountID:       uuid.New(),
+				Value:           50.0,
+				Name:            "Grocery Shopping",
+				Type:            models.Debit,
+				TransactionDate: nil,
 			},
 			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountID uuid.UUID) {
 				account := models.NewAccount(uuid.New(), "Test Account", "USD")
@@ -246,10 +248,11 @@ func TestCreateTransactionService_CreateSingleTransactionFromData(t *testing.T) 
 		{
 			name: "success with top-up transaction",
 			data: models.TransactionData{
-				AccountID: uuid.New(),
-				Value:     100.0,
-				Name:      "Salary Deposit",
-				Type:      models.TopUp,
+				AccountID:       uuid.New(),
+				Value:           100.0,
+				Name:            "Salary Deposit",
+				Type:            models.TopUp,
+				TransactionDate: nil,
 			},
 			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountID uuid.UUID) {
 				account := models.NewAccount(uuid.New(), "Test Account", "USD")
@@ -261,10 +264,11 @@ func TestCreateTransactionService_CreateSingleTransactionFromData(t *testing.T) 
 		{
 			name: "error when account not found",
 			data: models.TransactionData{
-				AccountID: uuid.New(),
-				Value:     50.0,
-				Name:      "Test Transaction",
-				Type:      models.Debit,
+				AccountID:       uuid.New(),
+				Value:           50.0,
+				Name:            "Test Transaction",
+				Type:            models.Debit,
+				TransactionDate: nil,
 			},
 			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountID uuid.UUID) {
 			},
@@ -273,10 +277,11 @@ func TestCreateTransactionService_CreateSingleTransactionFromData(t *testing.T) 
 		{
 			name: "error when name is empty",
 			data: models.TransactionData{
-				AccountID: uuid.New(),
-				Value:     50.0,
-				Name:      "",
-				Type:      models.Debit,
+				AccountID:       uuid.New(),
+				Value:           50.0,
+				Name:            "",
+				Type:            models.Debit,
+				TransactionDate: nil,
 			},
 			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountID uuid.UUID) {
 				account := models.NewAccount(uuid.New(), "Test Account", "USD")
@@ -288,10 +293,11 @@ func TestCreateTransactionService_CreateSingleTransactionFromData(t *testing.T) 
 		{
 			name: "error when value is zero or negative",
 			data: models.TransactionData{
-				AccountID: uuid.New(),
-				Value:     0.0,
-				Name:      "Test Transaction",
-				Type:      models.Debit,
+				AccountID:       uuid.New(),
+				Value:           0.0,
+				Name:            "Test Transaction",
+				Type:            models.Debit,
+				TransactionDate: nil,
 			},
 			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountID uuid.UUID) {
 				account := models.NewAccount(uuid.New(), "Test Account", "USD")
@@ -299,6 +305,54 @@ func TestCreateTransactionService_CreateSingleTransactionFromData(t *testing.T) 
 				accountRepo.Create(account)
 			},
 			wantErr: true,
+		},
+		{
+			name: "error when transaction date is in the future",
+			data: models.TransactionData{
+				AccountID:       uuid.New(),
+				Value:           50.0,
+				Name:            "Future Transaction",
+				Type:            models.Debit,
+				TransactionDate: func() *time.Time { t := time.Now().Add(24 * time.Hour); return &t }(),
+			},
+			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountID uuid.UUID) {
+				account := models.NewAccount(uuid.New(), "Test Account", "USD")
+				account.ID = accountID
+				accountRepo.Create(account)
+			},
+			wantErr: true,
+		},
+		{
+			name: "error when transaction date is too far in the past",
+			data: models.TransactionData{
+				AccountID:       uuid.New(),
+				Value:           50.0,
+				Name:            "Old Transaction",
+				Type:            models.Debit,
+				TransactionDate: func() *time.Time { t := time.Now().AddDate(-11, 0, 0); return &t }(),
+			},
+			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountID uuid.UUID) {
+				account := models.NewAccount(uuid.New(), "Test Account", "USD")
+				account.ID = accountID
+				accountRepo.Create(account)
+			},
+			wantErr: true,
+		},
+		{
+			name: "success with valid transaction date",
+			data: models.TransactionData{
+				AccountID:       uuid.New(),
+				Value:           50.0,
+				Name:            "Valid Date Transaction",
+				Type:            models.Debit,
+				TransactionDate: func() *time.Time { t := time.Now().Add(-24 * time.Hour); return &t }(),
+			},
+			repoSetup: func(accountRepo models.AccountRepository, transactionRepo models.TransactionRepository, accountID uuid.UUID) {
+				account := models.NewAccount(uuid.New(), "Test Account", "USD")
+				account.ID = accountID
+				accountRepo.Create(account)
+			},
+			wantErr: false,
 		},
 	}
 

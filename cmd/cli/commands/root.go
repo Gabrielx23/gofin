@@ -22,6 +22,7 @@ func init() {
 	rootCmd.AddCommand(createAccessCmd)
 	rootCmd.AddCommand(createAccountCmd)
 	rootCmd.AddCommand(createTransactionCmd)
+	rootCmd.AddCommand(getBalanceCmd)
 }
 
 func exitWithError(err error) {
