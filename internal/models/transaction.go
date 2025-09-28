@@ -60,6 +60,7 @@ type TransactionRepository interface {
 	GetByID(id uuid.UUID) (*Transaction, error)
 	GetByAccountIDWithDateRange(accountID uuid.UUID, startDate, endDate *time.Time) ([]*Transaction, error)
 	GetByProjectIDWithDateRange(projectID uuid.UUID, startDate, endDate *time.Time) ([]*Transaction, error)
+	GetTransactionsWithFilters(query TransactionQuery) ([]*Transaction, error)
 }
 
 func NewTransaction(data TransactionData) *Transaction {

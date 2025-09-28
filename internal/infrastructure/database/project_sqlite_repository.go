@@ -82,3 +82,19 @@ func (r *ProjectSqliteRepository) ExistsBySlug(slug string) (bool, error) {
 
 	return count > 0, nil
 }
+
+func (r *ProjectSqliteRepository) GetByID(id uuid.UUID) (*models.Project, error) {
+	query := `SELECT id, slug, name, created_at, updated_at FROM projects WHERE id = ?`
+	row := r.db.QueryRow(query, id.String())
+
+	var project models.Project
+	err := row.Scan(&project.ID, &project.Slug, &project.Name, &project.CreatedAt, &project.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("project with ID '%s' not found", id.String())
+		}
+		return nil, fmt.Errorf("failed to get project by ID: %w", err)
+	}
+
+	return &project, nil
+}

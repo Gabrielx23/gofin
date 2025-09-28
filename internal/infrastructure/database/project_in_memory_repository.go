@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/google/uuid"
 	"gofin/internal/models"
 )
 
@@ -48,4 +49,17 @@ func (r *ProjectInMemoryRepository) ExistsBySlug(slug string) (bool, error) {
 
 	_, exists := r.projects[slug]
 	return exists, nil
+}
+
+func (r *ProjectInMemoryRepository) GetByID(id uuid.UUID) (*models.Project, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, project := range r.projects {
+		if project.ID == id {
+			return project, nil
+		}
+	}
+
+	return nil, fmt.Errorf("project with ID '%s' not found", id.String())
 }

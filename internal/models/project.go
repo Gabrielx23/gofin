@@ -16,6 +16,7 @@ type Project struct {
 
 type ProjectRepository interface {
 	Create(project *Project) error
+	GetByID(id uuid.UUID) (*Project, error)
 	GetBySlug(slug string) (*Project, error)
 	ExistsBySlug(slug string) (bool, error)
 }

@@ -257,3 +257,57 @@ func (r *TransactionSqliteRepository) GetByProjectIDWithDateRange(projectID uuid
 
 	return transactions, nil
 }
+func (r *TransactionSqliteRepository) GetTransactionsWithFilters(query models.TransactionQuery) ([]*models.Transaction, error) {
+	var baseQuery string
+	var args []interface{}
+
+	if query.ProjectID != nil {
+		baseQuery = `
+			SELECT t.id, t.account_id, t.value, t.name, t.transaction_date, t.type, t.group_id, t.created_at, t.updated_at
+			FROM transactions t
+			JOIN accounts a ON t.account_id = a.id
+			WHERE a.project_id = ?
+		`
+		args = append(args, query.ProjectID.String())
+	} else {
+		baseQuery = `
+			SELECT t.id, t.account_id, t.value, t.name, t.transaction_date, t.type, t.group_id, t.created_at, t.updated_at
+			FROM transactions t
+			WHERE t.account_id = ?
+		`
+		args = append(args, query.AccountID.String())
+	}
+
+	if query.StartDate != nil {
+		baseQuery += " AND t.transaction_date >= ?"
+		args = append(args, *query.StartDate)
+	}
+
+	if query.EndDate != nil {
+		baseQuery += " AND t.transaction_date <= ?"
+		args = append(args, *query.EndDate)
+	}
+
+	baseQuery += " ORDER BY t.transaction_date DESC"
+
+	rows, err := r.db.Query(baseQuery, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query transactions with filters: %w", err)
+	}
+	defer rows.Close()
+
+	var transactions []*models.Transaction
+	for rows.Next() {
+		transaction, err := r.scanTransaction(rows)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan transaction: %w", err)
+		}
+		transactions = append(transactions, transaction)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating transaction rows: %w", err)
+	}
+
+	return transactions, nil
+}

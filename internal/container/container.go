@@ -9,6 +9,7 @@ import (
 	"gofin/internal/cases/create_project"
 	"gofin/internal/cases/create_transaction"
 	"gofin/internal/cases/get_project_balance"
+	"gofin/internal/cases/get_transactions"
 	"gofin/internal/infrastructure/database"
 	"gofin/internal/models"
 )
@@ -23,6 +24,7 @@ type Container struct {
 	CreateAccountService     *create_account.CreateAccountService
 	CreateTransactionService *create_transaction.CreateTransactionService
 	GetProjectBalanceService *get_project_balance.GetProjectBalanceService
+	GetTransactionsService   *get_transactions.GetTransactionsService
 	DB                       database.Database
 }
 
@@ -41,6 +43,7 @@ func NewContainer(dbPath string) (*Container, error) {
 	createAccountService := create_account.NewCreateAccountService(accountRepo, projectRepo)
 	createTransactionService := create_transaction.NewCreateTransactionService(transactionRepo, accountRepo)
 	getProjectBalanceService := get_project_balance.NewGetProjectBalanceService(transactionRepo, accountRepo, projectRepo)
+	getTransactionsService := get_transactions.NewGetTransactionsService(transactionRepo, accountRepo, projectRepo)
 
 	return &Container{
 		ProjectRepository:        projectRepo,
@@ -52,6 +55,7 @@ func NewContainer(dbPath string) (*Container, error) {
 		CreateAccountService:     createAccountService,
 		CreateTransactionService: createTransactionService,
 		GetProjectBalanceService: getProjectBalanceService,
+		GetTransactionsService:   getTransactionsService,
 		DB:                       db,
 	}, nil
 }

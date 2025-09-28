@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -111,4 +112,34 @@ func (r *TransactionInMemoryRepository) isTransactionInDateRange(transaction *mo
 		return false
 	}
 	return true
+}
+
+func (r *TransactionInMemoryRepository) GetTransactionsWithFilters(query models.TransactionQuery) ([]*models.Transaction, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var transactions []*models.Transaction
+	for _, transaction := range r.transactions {
+		if r.matchesFilters(transaction, query) {
+			transactions = append(transactions, transaction)
+		}
+	}
+
+	sort.Slice(transactions, func(i, j int) bool {
+		return transactions[i].TransactionDate.After(transactions[j].TransactionDate)
+	})
+
+	return transactions, nil
+}
+
+func (r *TransactionInMemoryRepository) matchesFilters(transaction *models.Transaction, query models.TransactionQuery) bool {
+	if query.ProjectID != nil {
+		return r.isTransactionInDateRange(transaction, query.StartDate, query.EndDate)
+	}
+
+	if query.AccountID != nil && transaction.AccountID != *query.AccountID {
+		return false
+	}
+
+	return r.isTransactionInDateRange(transaction, query.StartDate, query.EndDate)
 }
