@@ -73,7 +73,7 @@ func (r *ProjectSqliteRepository) GetBySlug(slug string) (*models.Project, error
 
 func (r *ProjectSqliteRepository) ExistsBySlug(slug string) (bool, error) {
 	query := `SELECT COUNT(*) FROM projects WHERE slug = ?`
-	
+
 	var count int
 	err := r.db.QueryRow(query, slug).Scan(&count)
 	if err != nil {

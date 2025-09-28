@@ -1,3 +1,4 @@
 .cursor/
 bin/
 database.db
+coverage.out

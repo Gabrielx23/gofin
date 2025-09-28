@@ -1,4 +1,4 @@
-.PHONY: build run clean test deps
+.PHONY: build run clean test deps check ci
 
 # Build the CLI
 build:
@@ -17,15 +17,26 @@ deps:
 clean:
 	rm -rf bin/
 	rm -f database.db
+	rm -f coverage.out
 
 # Run tests
 test:
 	go test ./...
 
-# Create a new project (example)
-create-project:
-	./bin/gofin create-project --name "My Financial Project"
+# Run tests with coverage
+test-coverage:
+	go test -v -race -coverprofile=coverage.out ./...
 
-# Create a project with custom slug
-create-project-custom:
-	./bin/gofin create-project --name "My Financial Project" --slug "my-financial-project"
+# Check formatting
+check-format:
+	@if [ "$$(gofmt -s -l . | wc -l)" -gt 0 ]; then \
+		echo "The following files are not formatted:"; \
+		gofmt -s -l .; \
+		exit 1; \
+	fi
+
+# Run all checks (format, test, build)
+check: check-format test build
+
+# CI pipeline (same as GitHub Actions)
+ci: deps check-format test-coverage build

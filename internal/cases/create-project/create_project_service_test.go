@@ -9,8 +9,8 @@ import (
 )
 
 type testContainer struct {
-	ProjectRepository     models.ProjectRepository
-	CreateProjectService  *CreateProjectService
+	ProjectRepository    models.ProjectRepository
+	CreateProjectService *CreateProjectService
 }
 
 func newTestContainer() *testContainer {
@@ -78,29 +78,29 @@ func TestCreateProjectService_CreateProject(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			testContainer := newTestContainer()
 			tt.repoSetup(testContainer)
-			
+
 			project, err := testContainer.CreateProjectService.CreateProject(tt.projectName, tt.customSlug)
-			
+
 			if tt.wantErr {
 				if err == nil {
 					t.Errorf("CreateProject() expected error, got nil")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Errorf("CreateProject() unexpected error: %v", err)
 				return
 			}
-			
+
 			if project.Name != tt.projectName {
 				t.Errorf("CreateProject() project name = %v, want %v", project.Name, tt.projectName)
 			}
-			
+
 			if project.Slug != tt.wantSlug {
 				t.Errorf("CreateProject() project slug = %v, want %v", project.Slug, tt.wantSlug)
 			}
-			
+
 			if project.ID.String() == "" {
 				t.Errorf("CreateProject() project ID should not be empty")
 			}
@@ -110,64 +110,64 @@ func TestCreateProjectService_CreateProject(t *testing.T) {
 
 func TestCreateProjectService_ensureUniqueSlug(t *testing.T) {
 	tests := []struct {
-		name        string
-		baseSlug    string
+		name          string
+		baseSlug      string
 		existingSlugs []string
-		wantSlug    string
-		wantErr     bool
+		wantSlug      string
+		wantErr       bool
 	}{
 		{
-			name:        "unique slug returned when not exists",
-			baseSlug:    "test-project",
+			name:          "unique slug returned when not exists",
+			baseSlug:      "test-project",
 			existingSlugs: []string{},
-			wantSlug:    "test-project",
-			wantErr:     false,
+			wantSlug:      "test-project",
+			wantErr:       false,
 		},
 		{
-			name:        "numbered slug when base exists",
-			baseSlug:    "test-project",
+			name:          "numbered slug when base exists",
+			baseSlug:      "test-project",
 			existingSlugs: []string{"test-project"},
-			wantSlug:    "test-project-1",
-			wantErr:     false,
+			wantSlug:      "test-project-1",
+			wantErr:       false,
 		},
 		{
-			name:        "incremented slug when multiple exist",
-			baseSlug:    "test-project",
+			name:          "incremented slug when multiple exist",
+			baseSlug:      "test-project",
 			existingSlugs: []string{"test-project", "test-project-1"},
-			wantSlug:    "test-project-2",
-			wantErr:     false,
+			wantSlug:      "test-project-2",
+			wantErr:       false,
 		},
 		{
-			name:        "error when max attempts reached",
-			baseSlug:    "test-project",
+			name:          "error when max attempts reached",
+			baseSlug:      "test-project",
 			existingSlugs: generateExistingSlugs("test-project", maxSlugAttempts+1),
-			wantErr:     true,
+			wantErr:       true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testContainer := newTestContainer()
-			
+
 			for _, slug := range tt.existingSlugs {
 				project := models.NewProject("Test Project", slug)
 				testContainer.ProjectRepository.Create(project)
 			}
-			
+
 			slug, err := testContainer.CreateProjectService.ensureUniqueSlug(tt.baseSlug)
-			
+
 			if tt.wantErr {
 				if err == nil {
 					t.Errorf("ensureUniqueSlug() expected error, got nil")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Errorf("ensureUniqueSlug() unexpected error: %v", err)
 				return
 			}
-			
+
 			if slug != tt.wantSlug {
 				t.Errorf("ensureUniqueSlug() = %v, want %v", slug, tt.wantSlug)
 			}
@@ -177,52 +177,52 @@ func TestCreateProjectService_ensureUniqueSlug(t *testing.T) {
 
 func TestCreateProjectService_determineSlug(t *testing.T) {
 	testContainer := newTestContainer()
-	
+
 	tests := []struct {
-		name       string
+		name        string
 		projectName string
 		customSlug  string
-		wantSlug   string
-		wantErr    bool
+		wantSlug    string
+		wantErr     bool
 	}{
 		{
-			name:       "auto-generated slug from name",
+			name:        "auto-generated slug from name",
 			projectName: "My Test Project",
 			customSlug:  "",
-			wantSlug:   "my-test-project",
-			wantErr:    false,
+			wantSlug:    "my-test-project",
+			wantErr:     false,
 		},
 		{
-			name:       "custom slug when provided",
+			name:        "custom slug when provided",
 			projectName: "My Test Project",
 			customSlug:  "custom-slug",
-			wantSlug:   "custom-slug",
-			wantErr:    false,
+			wantSlug:    "custom-slug",
+			wantErr:     false,
 		},
 		{
-			name:       "error when custom slug is invalid",
+			name:        "error when custom slug is invalid",
 			projectName: "My Test Project",
 			customSlug:  "Invalid_Slug",
-			wantErr:    true,
+			wantErr:     true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			slug, err := testContainer.CreateProjectService.determineSlug(tt.projectName, tt.customSlug)
-			
+
 			if tt.wantErr {
 				if err == nil {
 					t.Errorf("determineSlug() expected error, got nil")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Errorf("determineSlug() unexpected error: %v", err)
 				return
 			}
-			
+
 			if slug != tt.wantSlug {
 				t.Errorf("determineSlug() = %v, want %v", slug, tt.wantSlug)
 			}

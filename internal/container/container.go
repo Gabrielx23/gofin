@@ -10,9 +10,9 @@ import (
 )
 
 type Container struct {
-	DB                    *database.DB
-	ProjectRepository     models.ProjectRepository
-	CreateProjectService  *createproject.CreateProjectService
+	DB                   *database.DB
+	ProjectRepository    models.ProjectRepository
+	CreateProjectService *createproject.CreateProjectService
 }
 
 func NewContainer(dbPath string) (*Container, error) {

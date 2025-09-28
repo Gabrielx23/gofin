@@ -28,7 +28,7 @@ func (s *CreateProjectService) CreateProject(name, customSlug string) (*models.P
 	}
 
 	project := models.NewProject(name, finalSlug)
-	
+
 	err = s.projectRepo.Create(project)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create project: %w", err)

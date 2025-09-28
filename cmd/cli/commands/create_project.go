@@ -27,7 +27,7 @@ var createProjectCmd = &cobra.Command{
 func init() {
 	createProjectCmd.Flags().StringVarP(&projectName, "name", "n", "", "Project name (required)")
 	createProjectCmd.Flags().StringVarP(&projectSlug, "slug", "s", "", "Project slug (optional, will be generated from name if not provided)")
-	
+
 	createProjectCmd.MarkFlagRequired("name")
 }
 
