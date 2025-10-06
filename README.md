@@ -1,6 +1,6 @@
-# Gofin - Financial Management CLI
+# Gofin - Financial Management
 
-A simple financial management app built with Go, htmx and alpine.js.
+A simple financial management app built with Go.
 
 ## Installation
 
@@ -10,22 +10,7 @@ A simple financial management app built with Go, htmx and alpine.js.
    make deps
    ```
 
-3. Build the CLI:
-   ```bash
-   make build
-   ```
-
-## Usage
-
-### Available CLI Commands
-
-- `create-project`: Create a new financial project
-  - `--name, -n`: Project name (required)
-  - `--slug, -s`: Project slug (optional, auto-generated if not provided)
-
 ## Development
-
-### Local Development
 
 ```bash
 # Install dependencies

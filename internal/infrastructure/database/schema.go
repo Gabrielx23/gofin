@@ -49,7 +49,7 @@ func (db *DB) migrate() error {
 			id TEXT PRIMARY KEY,
 			project_id TEXT NOT NULL,
 			uid TEXT NOT NULL,
-			pin TEXT NOT NULL,
+			pin_hash TEXT NOT NULL,
 			name TEXT NOT NULL,
 			readonly BOOLEAN NOT NULL DEFAULT 0,
 			created_at DATETIME NOT NULL,

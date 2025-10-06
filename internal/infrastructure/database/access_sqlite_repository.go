@@ -19,7 +19,7 @@ func NewAccessSqliteRepository(db *sql.DB) *AccessSqliteRepository {
 
 func (r *AccessSqliteRepository) Create(access *models.Access) error {
 	query := `
-		INSERT INTO access (id, project_id, uid, pin, name, readonly, created_at, updated_at)
+		INSERT INTO access (id, project_id, uid, pin_hash, name, readonly, created_at, updated_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
@@ -28,7 +28,7 @@ func (r *AccessSqliteRepository) Create(access *models.Access) error {
 		access.ID.String(),
 		access.ProjectID.String(),
 		access.UID,
-		access.PIN,
+		access.PinHash,
 		access.Name,
 		access.ReadOnly,
 		access.CreatedAt,
@@ -44,7 +44,7 @@ func (r *AccessSqliteRepository) Create(access *models.Access) error {
 
 func (r *AccessSqliteRepository) GetByProjectID(projectID uuid.UUID) ([]*models.Access, error) {
 	query := `
-		SELECT id, project_id, uid, pin, name, readonly, created_at, updated_at
+		SELECT id, project_id, uid, pin_hash, name, readonly, created_at, updated_at
 		FROM access
 		WHERE project_id = ?
 		ORDER BY created_at ASC
@@ -74,7 +74,7 @@ func (r *AccessSqliteRepository) GetByProjectID(projectID uuid.UUID) ([]*models.
 
 func (r *AccessSqliteRepository) GetByUID(projectID uuid.UUID, uid string) (*models.Access, error) {
 	query := `
-		SELECT id, project_id, uid, pin, name, readonly, created_at, updated_at
+		SELECT id, project_id, uid, pin_hash, name, readonly, created_at, updated_at
 		FROM access
 		WHERE project_id = ? AND uid = ?
 	`
@@ -99,14 +99,25 @@ func (r *AccessSqliteRepository) ExistsByUID(projectID uuid.UUID, uid string) (b
 	return count > 0, nil
 }
 
+func (r *AccessSqliteRepository) GetByID(id uuid.UUID) (*models.Access, error) {
+	query := `
+		SELECT id, project_id, uid, pin_hash, name, readonly, created_at, updated_at
+		FROM access
+		WHERE id = ?
+	`
+
+	row := r.db.QueryRow(query, id.String())
+	return r.scanAccess(row)
+}
+
 func (r *AccessSqliteRepository) scanAccess(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*models.Access, error) {
-	var id, projectID, uid, pin, name string
+	var id, projectID, uid, pinHash, name string
 	var readonly bool
 	var createdAt, updatedAt time.Time
 
-	err := scanner.Scan(&id, &projectID, &uid, &pin, &name, &readonly, &createdAt, &updatedAt)
+	err := scanner.Scan(&id, &projectID, &uid, &pinHash, &name, &readonly, &createdAt, &updatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("access not found")
@@ -128,7 +139,7 @@ func (r *AccessSqliteRepository) scanAccess(scanner interface {
 		ID:        accessID,
 		ProjectID: projID,
 		UID:       uid,
-		PIN:       pin,
+		PinHash:   pinHash,
 		Name:      name,
 		ReadOnly:  readonly,
 		CreatedAt: createdAt,

@@ -68,6 +68,19 @@ func (r *AccessInMemoryRepository) ExistsByUID(projectID uuid.UUID, uid string) 
 	return exists, nil
 }
 
+func (r *AccessInMemoryRepository) GetByID(id uuid.UUID) (*models.Access, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, access := range r.accesses {
+		if access.ID == id {
+			return access, nil
+		}
+	}
+
+	return nil, fmt.Errorf("access with ID '%s' not found", id.String())
+}
+
 func (r *AccessInMemoryRepository) getKey(projectID uuid.UUID, uid string) string {
 	return fmt.Sprintf("%s:%s", projectID.String(), uid)
 }

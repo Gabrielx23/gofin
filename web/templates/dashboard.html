@@ -1,0 +1,45 @@
+{{define "content"}}
+<div class="header">
+    <h1>{{.ProjectName}}</h1>
+    <div class="header-info">
+        <div class="user-info">
+            <strong>{{.AccessName}}</strong> 👋
+            {{if .ReadOnly}}
+            <span class="readonly-badge">Read Only</span>
+            {{end}}
+        </div>
+        <a href="/{{.ProjectSlug}}/logout">
+            <button class="logout-button">Logout</button>
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="welcome-card">
+        <h2>Welcome to your project dashboard!</h2>
+        <p>You have successfully logged in to your financial project.</p>
+
+        <div class="project-details">
+            <h3>Project Information</h3>
+            <div class="detail-row">
+                <span class="detail-label">Project ID:</span>
+                <span class="detail-value">{{.ProjectID}}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Project Name:</span>
+                <span class="detail-value">{{.ProjectName}}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Access Level:</span>
+                <span class="detail-value">
+                    {{if .ReadOnly}}
+                    <span class="readonly-badge">Read Only</span>
+                    {{else}}
+                    <span class="readwrite-badge">Read/Write</span>
+                    {{end}}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,41 @@
+{{define "content"}}
+<div class="login-container">
+    <div class="login-header">
+        <h1>Login</h1>
+    </div>
+
+    <div class="project-info">
+        {{.ProjectSlug}}
+    </div>
+
+    {{if .ErrorMsg}}
+    <div class="error-message">{{.ErrorMsg}}</div>
+    {{end}}
+
+    <form method="POST" action="/{{.ProjectSlug}}/login">
+        <div class="form-group">
+            <label for="uid">ID</label>
+            <div class="input-group">
+                <input type="text" name="uid_0" class="digit-input" maxlength="1" pattern="[0-9]" required>
+                <input type="text" name="uid_1" class="digit-input" maxlength="1" pattern="[0-9]" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="pin">PIN</label>
+            <div class="pin-inputs">
+                <input type="text" name="pin_0" class="pin-input" maxlength="1" pattern="[0-9]" required>
+                <input type="text" name="pin_1" class="pin-input" maxlength="1" pattern="[0-9]" required>
+                <input type="text" name="pin_2" class="pin-input" maxlength="1" pattern="[0-9]" required>
+                <input type="text" name="pin_3" class="pin-input" maxlength="1" pattern="[0-9]" required>
+                <input type="text" name="pin_4" class="pin-input" maxlength="1" pattern="[0-9]" required>
+                <input type="text" name="pin_5" class="pin-input" maxlength="1" pattern="[0-9]" required>
+                <input type="text" name="pin_6" class="pin-input" maxlength="1" pattern="[0-9]" required>
+                <input type="text" name="pin_7" class="pin-input" maxlength="1" pattern="[0-9]" required>
+            </div>
+        </div>
+
+        <button type="submit" class="login-button">Login</button>
+    </form>
+</div>
+{{end}}

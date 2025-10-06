@@ -12,6 +12,7 @@ import (
 	"gofin/internal/cases/get_transactions"
 	"gofin/internal/infrastructure/database"
 	"gofin/internal/models"
+	"gofin/web"
 )
 
 type Container struct {
@@ -61,5 +62,5 @@ func NewContainer(dbPath string) (*Container, error) {
 }
 
 func NewContainerWithDefaultConfig() (*Container, error) {
-	return NewContainer(filepath.Join(".", "database.db"))
+	return NewContainer(filepath.Join(".", web.DatabaseFile))
 }
