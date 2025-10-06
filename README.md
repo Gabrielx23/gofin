@@ -17,10 +17,16 @@ A simple financial management app built with Go.
 make deps
 
 # Build the CLI
-make build
+make build_cli
+
+# Build the web server
+make build_web
 
 # Run the CLI
-make run
+make run_cli
+
+# Run the web server
+make run_web
 
 # Run tests
 make test

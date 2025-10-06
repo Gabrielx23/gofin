@@ -98,8 +98,8 @@ func TestCreateAccessService_CreateAccess(t *testing.T) {
 				t.Errorf("CreateAccess() UID should not be empty")
 			}
 
-			if access.PIN == "" {
-				t.Errorf("CreateAccess() PIN should not be empty")
+			if access.PinHash == "" {
+				t.Errorf("CreateAccess() PinHash should not be empty")
 			}
 
 			if len(access.UID) != 2 {
@@ -110,12 +110,12 @@ func TestCreateAccessService_CreateAccess(t *testing.T) {
 				t.Errorf("CreateAccess() plain PIN length = %v, want 8", len(plainPIN))
 			}
 
-			if access.PIN == plainPIN {
-				t.Errorf("CreateAccess() PIN should be hashed, not plain text")
+			if access.PinHash == plainPIN {
+				t.Errorf("CreateAccess() PinHash should be hashed, not plain text")
 			}
 
-			if len(access.PIN) < 50 {
-				t.Errorf("CreateAccess() hashed PIN should be much longer than plain PIN")
+			if len(access.PinHash) < 50 {
+				t.Errorf("CreateAccess() hashed PinHash should be much longer than plain PIN")
 			}
 		})
 	}
