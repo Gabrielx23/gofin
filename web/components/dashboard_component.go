@@ -23,7 +23,7 @@ func NewDashboardComponent(container *container.Container) (*DashboardComponent,
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse dashboard template: %w", err)
 	}
-	
+
 	return &DashboardComponent{
 		container: container,
 		template:  tmpl,

@@ -4,20 +4,20 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"gofin/cmd/web/middleware"
 	"gofin/internal/container"
 	"gofin/web"
 	"gofin/web/components"
-	"gofin/cmd/web/middleware"
 )
 
 type DashboardHandler struct {
-	container *container.Container
+	container          *container.Container
 	dashboardComponent *components.DashboardComponent
 }
 
 func NewDashboardHandler(container *container.Container, dashboardComponent *components.DashboardComponent) *DashboardHandler {
 	return &DashboardHandler{
-		container: container,
+		container:          container,
 		dashboardComponent: dashboardComponent,
 	}
 }

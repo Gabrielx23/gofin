@@ -14,11 +14,11 @@ import (
 func AuthRequired(container *container.Container, sessionManager *session.SessionManager) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-	projectID, ok := GetProjectIDFromContext(r.Context())
-	if !ok {
-		http.Error(w, web.ProjectIDNotFoundError, http.StatusInternalServerError)
-		return
-	}
+			projectID, ok := GetProjectIDFromContext(r.Context())
+			if !ok {
+				http.Error(w, web.ProjectIDNotFoundError, http.StatusInternalServerError)
+				return
+			}
 
 			sessionToken, err := getSessionTokenFromCookie(r)
 			if err != nil {
@@ -70,10 +70,9 @@ func redirectToLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, web.ProjectSlugNotFoundError, http.StatusInternalServerError)
 		return
 	}
-	
+
 	http.Redirect(w, r, "/"+projectSlug+web.RouteLogin, http.StatusSeeOther)
 }
-
 
 func GetAccessIDFromContext(ctx context.Context) (string, bool) {
 	accessID, ok := ctx.Value(web.ContextAccessID).(string)

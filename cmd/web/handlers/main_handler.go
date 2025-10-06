@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"gofin/web"
 	"gofin/cmd/web/middleware"
+	"gofin/web"
 )
 
 type MainHandler struct{}
@@ -16,7 +16,7 @@ func NewMainHandler() *MainHandler {
 
 func (h *MainHandler) Handle(w http.ResponseWriter, req *http.Request) {
 	projectID, ok := middleware.GetProjectIDFromContext(req.Context())
-	
+
 	if !ok || projectID == uuid.Nil {
 		http.NotFound(w, req)
 		return
@@ -29,7 +29,7 @@ func (h *MainHandler) Handle(w http.ResponseWriter, req *http.Request) {
 	}
 
 	cookie, err := req.Cookie(web.SessionTokenCookie)
-	
+
 	if err != nil || cookie.Value == web.EmptyString {
 		http.Redirect(w, req, "/"+projectSlug+web.RouteLogin, http.StatusSeeOther)
 		return

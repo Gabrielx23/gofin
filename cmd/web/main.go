@@ -17,7 +17,7 @@ func main() {
 	defer container.DB.Close()
 
 	mux := http.NewServeMux()
-	
+
 	_, err = NewRouter(container, mux)
 	if err != nil {
 		log.Fatalf("Failed to initialize router: %v", err)

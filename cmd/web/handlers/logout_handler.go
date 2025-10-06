@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
+	"gofin/cmd/web/middleware"
 	"gofin/pkg/session"
 	"gofin/web"
-	"gofin/cmd/web/middleware"
 )
 
 type LogoutHandler struct{}

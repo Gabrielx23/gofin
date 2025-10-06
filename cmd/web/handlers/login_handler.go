@@ -6,23 +6,23 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"gofin/cmd/web/middleware"
 	"gofin/internal/container"
 	"gofin/pkg/password"
 	"gofin/pkg/session"
 	"gofin/web"
 	"gofin/web/components"
-	"gofin/cmd/web/middleware"
 )
 
 type LoginHandler struct {
-	container *container.Container
+	container      *container.Container
 	loginComponent *components.LoginComponent
 	sessionManager *session.SessionManager
 }
 
 func NewLoginHandler(container *container.Container, loginComponent *components.LoginComponent, sessionManager *session.SessionManager) *LoginHandler {
 	return &LoginHandler{
-		container: container,
+		container:      container,
 		loginComponent: loginComponent,
 		sessionManager: sessionManager,
 	}
@@ -47,13 +47,13 @@ func (h *LoginHandler) Handle(w http.ResponseWriter, r *http.Request) {
 			h.loginComponent.RenderLoginPage(w, r, projectSlug, web.EmptyString)
 			return
 		}
-		
+
 		token, valid := h.sessionManager.ValidateSessionToken(cookie.Value)
 		if !valid || token.ProjectID != projectID.String() {
 			h.loginComponent.RenderLoginPage(w, r, projectSlug, web.EmptyString)
 			return
 		}
-		
+
 		http.Redirect(w, r, "/"+projectSlug+web.RouteDashboard, http.StatusSeeOther)
 		return
 	}
@@ -99,7 +99,7 @@ func (h *LoginHandler) handleLoginPost(w http.ResponseWriter, r *http.Request, p
 	}
 
 	session.SetSessionCookie(w, sessionToken)
-	
+
 	http.Redirect(w, r, "/"+projectSlug+web.RouteDashboard, http.StatusSeeOther)
 }
 
@@ -126,4 +126,3 @@ func (h *LoginHandler) extractPIN(r *http.Request) string {
 	}
 	return strings.Join(pinParts, "")
 }
-
