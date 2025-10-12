@@ -44,7 +44,7 @@ func NewRouter(container *container.Container, mux *http.ServeMux) (*chi.Mux, er
 	router.Route("/{projectSlug}", func(chiRouter chi.Router) {
 		chiRouter.Use(middleware.ProjectBased(container))
 		chiRouter.Get("/", handlers.NewMainHandler(container).Handle)
-		chiRouter.Get(web.RouteLogin, handlers.NewLoginHandler(container, loginComponent, sessionManager).Handle)
+		chiRouter.Get(web.RouteLogin, handlers.NewLoginFormHandler(loginComponent, sessionManager).Handle)
 		chiRouter.Post(web.RouteLogin, handlers.NewLoginHandler(container, loginComponent, sessionManager).Handle)
 		chiRouter.Get(web.RouteLogout, handlers.NewLogoutHandler(container).Handle)
 		chiRouter.Get(web.RouteDashboard, middleware.AuthRequired(container, sessionManager)(handlers.NewDashboardHandler(container, dashboardComponent).Handle))

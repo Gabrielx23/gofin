@@ -160,7 +160,7 @@ func (h *CreateTransactionHandler) Handle(w http.ResponseWriter, r *http.Request
 		return
 	}
 	
-	webpkg.RedirectWithSuccess(w, r, "/"+project.Slug+web.RouteDashboard, web.SuccessKeyTransactionsCreated)
+	webpkg.RedirectToProjectHomeWithSuccess(w, r, project.Slug, web.SuccessKeyTransactionsCreated)
 }
 
 func (h *CreateTransactionHandler) renderCreateTransactionForm(w http.ResponseWriter, r *http.Request, accounts []*models.Account, projectSlug, errorMsg string) {

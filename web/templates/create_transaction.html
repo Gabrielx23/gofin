@@ -41,8 +41,9 @@
                         <label for="type_template">Type *</label>
                         <select id="type_template" name="groups[template].type">
                             <option value="">Select type</option>
-                            <option value="debit" selected>Debit</option>
-                            <option value="top-up">Top Up</option>
+                            {{range .TransactionTypes}}
+                            <option value="{{.Value}}" {{if .Selected}}selected{{end}}>{{.Label}}</option>
+                            {{end}}
                         </select>
                     </div>
                     <div class="form-group">

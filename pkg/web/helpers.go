@@ -28,3 +28,7 @@ func RedirectToProjectLogin(w http.ResponseWriter, r *http.Request, projectSlug 
 func RedirectToProjectDashboard(w http.ResponseWriter, r *http.Request, projectSlug string) {
 	http.Redirect(w, r, "/"+projectSlug+web.RouteDashboard, http.StatusSeeOther)
 }
+
+func RedirectToProjectHomeWithSuccess(w http.ResponseWriter, r *http.Request, projectSlug, successMessage string) {
+	RedirectWithSuccess(w, r, "/"+projectSlug+web.RouteDashboard, successMessage)
+}

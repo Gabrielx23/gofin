@@ -20,6 +20,12 @@ const (
 	templateError          = "Failed to render transaction page"
 )
 
+type TransactionTypeOption struct {
+	Value    string
+	Label    string
+	Selected bool
+}
+
 type TransactionCreationComponent struct {
 	container *container.Container
 	template  *template.Template
@@ -42,22 +48,39 @@ func NewTransactionCreationComponent(container *container.Container) (*Transacti
 
 func (c *TransactionCreationComponent) RenderCreateTransactionPage(w http.ResponseWriter, r *http.Request, projectSlug string, accounts []*models.Account, errorMsg string) {
 	data := struct {
-		Title       string
-		BodyClass   string
-		ProjectSlug string
-		Accounts    []*models.Account
-		DefaultDate string
-		ErrorMsg    string
+		Title           string
+		BodyClass       string
+		ProjectSlug     string
+		Accounts        []*models.Account
+		TransactionTypes []TransactionTypeOption
+		DefaultDate     string
+		ErrorMsg        string
 	}{
-		Title:       pageTitle,
-		BodyClass:   bodyClass,
-		ProjectSlug: projectSlug,
-		Accounts:    accounts,
-		DefaultDate: time.Now().Format(config.DateTimeFormat),
-		ErrorMsg:    errorMsg,
+		Title:           pageTitle,
+		BodyClass:       bodyClass,
+		ProjectSlug:     projectSlug,
+		Accounts:        accounts,
+		TransactionTypes: c.getTransactionTypeOptions(),
+		DefaultDate:     time.Now().Format(config.DateTimeFormat),
+		ErrorMsg:        errorMsg,
 	}
 
 	if err := c.template.Execute(w, data); err != nil {
 		http.Error(w, templateError, http.StatusInternalServerError)
+	}
+}
+
+func (c *TransactionCreationComponent) getTransactionTypeOptions() []TransactionTypeOption {
+	return []TransactionTypeOption{
+		{
+			Value:    string(models.Debit),
+			Label:    "Debit",
+			Selected: true,
+		},
+		{
+			Value:    string(models.TopUp),
+			Label:    "Top Up",
+			Selected: false,
+		},
 	}
 }

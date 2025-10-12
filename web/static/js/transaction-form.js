@@ -2,9 +2,11 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('transactionForm', () => ({
         groupCount: 0,
         accountOptions: '',
+        transactionTypeOptions: '',
 
         init() {
             this.accountOptions = this.getAccountOptions();
+            this.transactionTypeOptions = this.getTransactionTypeOptions();
             this.addGroup();
         },
 
@@ -81,6 +83,7 @@ document.addEventListener('alpine:init', () => {
                         element.value = this.getCurrentDateTime();
                     }
                     if (field.selector.includes('type')) {
+                        element.innerHTML = this.transactionTypeOptions;
                         element.value = 'debit';
                     }
                 }
@@ -105,6 +108,12 @@ document.addEventListener('alpine:init', () => {
         getAccountOptions() {
             const accountOptionsElement = document.getElementById('account-options');
             return accountOptionsElement ? accountOptionsElement.innerHTML : '';
+        },
+
+        getTransactionTypeOptions() {
+            const template = document.querySelector('[data-template="true"]');
+            const typeSelect = template.querySelector('select[name*="type"]');
+            return typeSelect ? typeSelect.innerHTML : '';
         },
 
         getCurrentDateTime() {

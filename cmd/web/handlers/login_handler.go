@@ -30,30 +30,7 @@ func NewLoginHandler(container *container.Container, loginComponent *components.
 
 func (h *LoginHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	project, _ := webpkg.GetProject(r.Context())
-
-	if r.Method == http.MethodGet {
-		cookie, err := r.Cookie(web.SessionTokenCookie)
-		if err != nil || cookie.Value == web.EmptyString {
-			h.loginComponent.RenderLoginPage(w, r, project.Slug, web.EmptyString)
-			return
-		}
-
-		token, valid := h.sessionManager.ValidateSessionToken(cookie.Value)
-		if !valid || token.ProjectID != project.ID.String() {
-			h.loginComponent.RenderLoginPage(w, r, project.Slug, web.EmptyString)
-			return
-		}
-
-		webpkg.RedirectWithSuccess(w, r, "/"+project.Slug+web.RouteDashboard, web.SuccessKeyLoginSuccessful)
-		return
-	}
-
-	if r.Method == http.MethodPost {
-		h.handleLoginPost(w, r, project.ID, project.Slug)
-		return
-	}
-
-	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	h.handleLoginPost(w, r, project.ID, project.Slug)
 }
 
 func (h *LoginHandler) handleLoginPost(w http.ResponseWriter, r *http.Request, projectID uuid.UUID, projectSlug string) {
@@ -90,7 +67,7 @@ func (h *LoginHandler) handleLoginPost(w http.ResponseWriter, r *http.Request, p
 
 	session.SetSessionCookie(w, sessionToken)
 
-	webpkg.RedirectWithSuccess(w, r, "/"+projectSlug+web.RouteDashboard, web.SuccessKeyLoginSuccessful)
+	webpkg.RedirectToProjectHomeWithSuccess(w, r, projectSlug, web.SuccessKeyLoginSuccessful)
 }
 
 func (h *LoginHandler) extractUID(r *http.Request) string {
