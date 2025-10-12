@@ -7,9 +7,6 @@
     <div class="header-info">
         <div class="user-info">
             <strong>{{.AccessName}}</strong> 👋
-            {{if .ReadOnly}}
-            <span class="readonly-badge">Read Only</span>
-            {{end}}
         </div>
         <a href="/{{.ProjectSlug}}/logout">
             <button class="logout-button">Logout</button>
@@ -19,38 +16,33 @@
 
 <div class="main-content">
     <div class="welcome-card">
-        <h2>Welcome to your project dashboard!</h2>
-        <p>You have successfully logged in to your financial project.</p>
-
-        <div class="project-details">
-            <h3>Project Information</h3>
-            <div class="detail-row">
-                <span class="detail-label">Project ID:</span>
-                <span class="detail-value">{{.ProjectID}}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Project Name:</span>
-                <span class="detail-value">{{.ProjectName}}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Access Level:</span>
-                <span class="detail-value">
-                    {{if .ReadOnly}}
-                    <span class="readonly-badge">Read Only</span>
-                    {{else}}
-                    <span class="readwrite-badge">Read/Write</span>
-                    {{end}}
-                </span>
-            </div>
-        </div>
+        <h2>{{.ProjectName}}</h2>
+        <p>Below you can see project balances and history.
+        </p>
 
         {{if not .ReadOnly}}
-        <div class="action-buttons">
-            <a href="/{{.ProjectSlug}}/transactions/create">
-                <button class="create-transaction-button">Create Transaction</button>
-            </a>
-        </div>
+
+        <a href="/{{.ProjectSlug}}/transactions/create">
+            <button class="create-transaction-button">Create Transaction</button>
+        </a>
         {{end}}
+
+        <div class="project-details">
+            <h3>Balances</h3>
+            {{if .AccountBalances}}
+            {{range .AccountBalances}}
+            <div class="detail-row">
+                <span class="detail-label">{{.Name}}:</span>
+                <span
+                    class="detail-value {{if .IsPositive}}positive-balance{{else}}negative-balance{{end}}">{{.Balance}}</span>
+            </div>
+            {{end}}
+            {{else}}
+            <div class="detail-row">
+                <span class="detail-label">No accounts found</span>
+            </div>
+            {{end}}
+        </div>
     </div>
 </div>
 {{end}}

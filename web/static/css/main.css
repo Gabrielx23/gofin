@@ -260,6 +260,16 @@ body.dashboard-page {
     color: #333;
 }
 
+.positive-balance {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.negative-balance {
+    color: #dc3545;
+    font-weight: 600;
+}
+
 .readonly-badge {
     background: #ffc107;
     color: #333;
