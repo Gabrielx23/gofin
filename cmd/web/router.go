@@ -50,6 +50,7 @@ func NewRouter(container *container.Container, mux *http.ServeMux) (*chi.Mux, er
 		chiRouter.Get(web.RouteDashboard, middleware.AuthRequired(container, sessionManager)(handlers.NewDashboardHandler(container, dashboardComponent).Handle))
 		chiRouter.Get(web.RouteCreateTransaction, middleware.AuthRequired(container, sessionManager)(middleware.ReadOnlyProhibited(container)(handlers.NewCreateTransactionFormHandler(container, transactionComponent).Handle)))
 		chiRouter.Post(web.RouteCreateTransaction, middleware.AuthRequired(container, sessionManager)(middleware.ReadOnlyProhibited(container)(handlers.NewCreateTransactionHandler(container, transactionComponent, createTransactionSvc).Handle)))
+		chiRouter.Post(web.RouteCreateAccount, middleware.AuthRequired(container, sessionManager)(middleware.ReadOnlyProhibited(container)(handlers.NewCreateAccountHandler(container.CreateAccountService).Handle)))
 	})
 
 	mux.Handle("/", router)

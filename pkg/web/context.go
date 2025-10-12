@@ -10,7 +10,7 @@ type contextKey string
 
 const (
 	projectKey contextKey = "project"
-	accessKey contextKey = "access"
+	accessKey  contextKey = "access"
 )
 
 func SetProject(ctx context.Context, project *models.Project) context.Context {

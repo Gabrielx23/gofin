@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	webcontext "gofin/pkg/web"
 	"gofin/internal/container"
+	webcontext "gofin/pkg/web"
 	"gofin/web"
 	"gofin/web/components"
 )

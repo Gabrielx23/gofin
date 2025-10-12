@@ -453,6 +453,111 @@ body.dashboard-page {
     padding-right: 3rem;
 }
 
+.account-select {
+    padding-right: 4rem !important;
+}
+
+.account-select-container {
+    position: relative;
+}
+
+.add-account-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    z-index: 10;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-account-btn:hover {
+    background: #218838;
+}
+
+.create-account-section {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 2px solid #007bff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.create-account-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    cursor: pointer;
+}
+
+.create-account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.create-account-form input,
+.create-account-form select {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.create-account-form .create-account-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.create-account-form .create-account-btn:hover {
+    background: #0056b3;
+}
+
+.create-account-form .cancel-create-account-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.create-account-form .cancel-create-account-btn:hover {
+    background: #5a6268;
+}
+
 .create-transaction-button.primary {
     background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
@@ -626,5 +731,22 @@ body.dashboard-page {
     .login-button {
         padding: 0.9rem;
         font-size: 1rem;
+    }
+
+    .add-account-btn {
+        width: 2rem;
+        height: 2rem;
+        font-size: 1rem;
+        right: 0.25rem;
+    }
+
+    .account-select {
+        padding-right: 3rem !important;
+    }
+
+    .create-account-section {
+        width: 95%;
+        max-width: 400px;
+        padding: 1.5rem;
     }
 }

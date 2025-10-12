@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	webcontext "gofin/pkg/web"
 	"gofin/internal/container"
 	"gofin/internal/models"
+	webcontext "gofin/pkg/web"
 )
 
 func ProjectBased(container *container.Container) func(http.Handler) http.Handler {
@@ -14,25 +14,25 @@ func ProjectBased(container *container.Container) func(http.Handler) http.Handle
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			path := r.URL.Path[1:]
 
-		if path == "" {
-			http.NotFound(w, r)
-			return
-		}
+			if path == "" {
+				http.NotFound(w, r)
+				return
+			}
 
-		parts := strings.Split(path, "/")
-		projectSlug := parts[0]
-		if projectSlug == "" {
-			http.NotFound(w, r)
-			return
-		}
+			parts := strings.Split(path, "/")
+			projectSlug := parts[0]
+			if projectSlug == "" {
+				http.NotFound(w, r)
+				return
+			}
 
-		project, err := container.ProjectRepository.GetBySlug(projectSlug)
-		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
+			project, err := container.ProjectRepository.GetBySlug(projectSlug)
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
 
-		serveWithProject(w, r, next, project)
+			serveWithProject(w, r, next, project)
 		})
 	}
 }
@@ -42,4 +42,3 @@ func serveWithProject(w http.ResponseWriter, r *http.Request, next http.Handler,
 	ctx = webcontext.SetProject(ctx, project)
 	next.ServeHTTP(w, r.WithContext(ctx))
 }
-

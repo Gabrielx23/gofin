@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"gofin/internal/container"
+	"gofin/pkg/session"
 	webcontext "gofin/pkg/web"
 	webpkg "gofin/pkg/web"
-	"gofin/pkg/session"
 )
 
 type LogoutHandler struct {

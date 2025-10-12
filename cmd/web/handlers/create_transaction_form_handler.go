@@ -3,13 +3,13 @@ package handlers
 import (
 	"net/http"
 
-	webcontext "gofin/pkg/web"
 	"gofin/internal/container"
+	webcontext "gofin/pkg/web"
 	"gofin/web/components"
 )
 
 type CreateTransactionFormHandler struct {
-	container           *container.Container
+	container            *container.Container
 	transactionComponent *components.TransactionCreationComponent
 }
 

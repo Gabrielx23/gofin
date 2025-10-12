@@ -25,7 +25,6 @@ func NewCreateTransactionService(transactionRepo models.TransactionRepository, a
 	}
 }
 
-
 func (s *CreateTransactionService) CreateGroupedTransactions(projectID uuid.UUID, transactions []models.TransactionData) ([]*models.Transaction, error) {
 	if len(transactions) == 0 {
 		return nil, fmt.Errorf("at least one transaction is required")
@@ -57,7 +56,6 @@ func (s *CreateTransactionService) CreateGroupedTransactions(projectID uuid.UUID
 	return createdTransactions, nil
 }
 
-
 func (s *CreateTransactionService) validateTransactionData(data models.TransactionData) error {
 	if data.Name == "" {
 		return fmt.Errorf("name is required")
@@ -74,7 +72,7 @@ func (s *CreateTransactionService) validateTransactionData(data models.Transacti
 	if data.TransactionDate != nil {
 		now := time.Now()
 		transactionDate := *data.TransactionDate
-		
+
 		if transactionDate.Before(now.AddDate(-10, 0, 0)) {
 			return fmt.Errorf("transaction date cannot be more than 10 years in the past")
 		}

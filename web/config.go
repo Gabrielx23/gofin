@@ -1,11 +1,12 @@
 package web
 
 const (
-	RouteLogin                = "/login"
-	RouteLogout               = "/logout"
-	RouteDashboard            = "/dashboard"
-	RouteCreateTransaction    = "/transactions/create"
-	RouteStatic               = "/static/*"
+	RouteLogin             = "/login"
+	RouteLogout            = "/logout"
+	RouteDashboard         = "/dashboard"
+	RouteCreateTransaction = "/transactions/create"
+	RouteCreateAccount     = "/accounts/create"
+	RouteStatic            = "/static/*"
 
 	TemplatesDir = "web/templates"
 	BaseTemplate = "web/templates/base.html"
@@ -39,4 +40,3 @@ const (
 
 	StaticDir = "web/static"
 )
-

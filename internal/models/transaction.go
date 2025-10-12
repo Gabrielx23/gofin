@@ -64,10 +64,10 @@ type TransactionRepository interface {
 }
 
 type TransactionQuery struct {
-	ProjectID           *uuid.UUID
-	AccountID           *uuid.UUID
-	StartDate           *time.Time
-	EndDate             *time.Time
+	ProjectID                 *uuid.UUID
+	AccountID                 *uuid.UUID
+	StartDate                 *time.Time
+	EndDate                   *time.Time
 	ExcludeFutureTransactions bool
 }
 

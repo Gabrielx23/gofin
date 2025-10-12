@@ -39,25 +39,25 @@ func NewDashboardComponent(container *container.Container) (*DashboardComponent,
 
 func (c *DashboardComponent) RenderDashboard(w http.ResponseWriter, r *http.Request, project *models.Project, access *models.Access, projectSlug, successKey string) {
 	successMessage := c.getSuccessMessage(successKey)
-	
+
 	data := struct {
-		Title        string
-		BodyClass    string
-		ProjectID    string
-		ProjectSlug  string
-		ProjectName  string
-		AccessName   string
-		ReadOnly     bool
-		SuccessMsg   string
+		Title       string
+		BodyClass   string
+		ProjectID   string
+		ProjectSlug string
+		ProjectName string
+		AccessName  string
+		ReadOnly    bool
+		SuccessMsg  string
 	}{
-		Title:        project.Name,
-		BodyClass:    dashboardBodyClass,
-		ProjectID:    project.ID.String(),
-		ProjectSlug:  projectSlug,
-		ProjectName:  project.Name,
-		AccessName:   access.Name,
-		ReadOnly:     access.ReadOnly,
-		SuccessMsg:   successMessage,
+		Title:       project.Name,
+		BodyClass:   dashboardBodyClass,
+		ProjectID:   project.ID.String(),
+		ProjectSlug: projectSlug,
+		ProjectName: project.Name,
+		AccessName:  access.Name,
+		ReadOnly:    access.ReadOnly,
+		SuccessMsg:  successMessage,
 	}
 
 	if err := c.template.Execute(w, data); err != nil {
@@ -70,7 +70,7 @@ func (c *DashboardComponent) getSuccessMessage(successKey string) string {
 		web.SuccessKeyTransactionsCreated: web.SuccessTransactionsCreated,
 		web.SuccessKeyLoginSuccessful:     web.SuccessLoginSuccessful,
 	}
-	
+
 	if message, exists := successMessages[successKey]; exists {
 		return message
 	}

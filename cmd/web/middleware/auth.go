@@ -5,15 +5,15 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	webcontext "gofin/pkg/web"
-	webpkg "gofin/pkg/web"
 	"gofin/internal/container"
 	"gofin/pkg/session"
+	webcontext "gofin/pkg/web"
+	webpkg "gofin/pkg/web"
 	"gofin/web"
 )
 
 func AuthRequired(container *container.Container, sessionManager *session.SessionManager) func(http.HandlerFunc) http.HandlerFunc {
-		return func(next http.HandlerFunc) http.HandlerFunc {
+	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			project, ok := webcontext.GetProject(r.Context())
 			if !ok {
@@ -76,9 +76,6 @@ func redirectToLogin(w http.ResponseWriter, r *http.Request, container *containe
 	webpkg.RedirectToProjectLogin(w, r, project.Slug)
 }
 
-
-
 func clearInvalidCookie(w http.ResponseWriter) {
 	session.ClearSessionCookie(w)
 }
-

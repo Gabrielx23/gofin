@@ -15,12 +15,18 @@ import (
 
 const (
 	transactionTemplateFile = "create_transaction.html"
-	pageTitle              = "Create Transaction"
-	bodyClass              = "dashboard-page"
-	templateError          = "Failed to render transaction page"
+	pageTitle               = "Create Transaction"
+	bodyClass               = "dashboard-page"
+	templateError           = "Failed to render transaction page"
 )
 
 type TransactionTypeOption struct {
+	Value    string
+	Label    string
+	Selected bool
+}
+
+type CurrencyOption struct {
 	Value    string
 	Label    string
 	Selected bool
@@ -48,21 +54,23 @@ func NewTransactionCreationComponent(container *container.Container) (*Transacti
 
 func (c *TransactionCreationComponent) RenderCreateTransactionPage(w http.ResponseWriter, r *http.Request, projectSlug string, accounts []*models.Account, errorMsg string) {
 	data := struct {
-		Title           string
-		BodyClass       string
-		ProjectSlug     string
-		Accounts        []*models.Account
+		Title            string
+		BodyClass        string
+		ProjectSlug      string
+		Accounts         []*models.Account
 		TransactionTypes []TransactionTypeOption
-		DefaultDate     string
-		ErrorMsg        string
+		CurrencyOptions  []CurrencyOption
+		DefaultDate      string
+		ErrorMsg         string
 	}{
-		Title:           pageTitle,
-		BodyClass:       bodyClass,
-		ProjectSlug:     projectSlug,
-		Accounts:        accounts,
+		Title:            pageTitle,
+		BodyClass:        bodyClass,
+		ProjectSlug:      projectSlug,
+		Accounts:         accounts,
 		TransactionTypes: c.getTransactionTypeOptions(),
-		DefaultDate:     time.Now().Format(config.DateTimeFormat),
-		ErrorMsg:        errorMsg,
+		CurrencyOptions:  c.getCurrencyOptions(),
+		DefaultDate:      time.Now().Format(config.DateTimeFormat),
+		ErrorMsg:         errorMsg,
 	}
 
 	if err := c.template.Execute(w, data); err != nil {
@@ -80,6 +88,21 @@ func (c *TransactionCreationComponent) getTransactionTypeOptions() []Transaction
 		{
 			Value:    string(models.TopUp),
 			Label:    "Top Up",
+			Selected: false,
+		},
+	}
+}
+
+func (c *TransactionCreationComponent) getCurrencyOptions() []CurrencyOption {
+	return []CurrencyOption{
+		{
+			Value:    "PLN",
+			Label:    "PLN - Polish Złoty",
+			Selected: true,
+		},
+		{
+			Value:    "EUR",
+			Label:    "EUR - Euro",
 			Selected: false,
 		},
 	}

@@ -30,10 +30,10 @@ func (s *ValidateAccountService) ValidateAccountForProject(projectID uuid.UUID, 
 	if err != nil {
 		return fmt.Errorf("account not found: %w", err)
 	}
-	
+
 	if account.ProjectID != projectID {
 		return fmt.Errorf("account does not belong to the specified project")
 	}
-	
+
 	return nil
 }

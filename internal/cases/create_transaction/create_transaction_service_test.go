@@ -69,7 +69,7 @@ func TestCreateTransactionService_CreateGroupedTransactions(t *testing.T) {
 				projectRepo.Create(project)
 				projectID = project.ID
 			}
-			
+
 			tt.repoSetup(accountRepo, transactionRepo, projectRepo, accountIDs, projectID)
 			transactions, err := service.CreateGroupedTransactions(projectID, tt.transactions)
 

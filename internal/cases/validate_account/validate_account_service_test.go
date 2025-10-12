@@ -11,13 +11,13 @@ import (
 
 func TestValidateAccountService_ValidateAccountExists(t *testing.T) {
 	accountID := uuid.New()
-	
+
 	tests := []struct {
-		name        string
-		accountID   uuid.UUID
-		repoSetup   func(models.AccountRepository)
-		wantErr     bool
-		errorMsg    string
+		name      string
+		accountID uuid.UUID
+		repoSetup func(models.AccountRepository)
+		wantErr   bool
+		errorMsg  string
 	}{
 		{
 			name:      "success when account exists",
@@ -28,7 +28,7 @@ func TestValidateAccountService_ValidateAccountExists(t *testing.T) {
 				account.ID = accountID
 				accountRepo.Create(account)
 			},
-			wantErr:  false,
+			wantErr: false,
 		},
 		{
 			name:      "error when account does not exist",
@@ -72,12 +72,12 @@ func TestValidateAccountService_ValidateAccountForProject(t *testing.T) {
 	accountID := uuid.New()
 
 	tests := []struct {
-		name        string
-		projectID   uuid.UUID
-		accountID   uuid.UUID
-		repoSetup   func(models.AccountRepository)
-		wantErr     bool
-		errorMsg    string
+		name      string
+		projectID uuid.UUID
+		accountID uuid.UUID
+		repoSetup func(models.AccountRepository)
+		wantErr   bool
+		errorMsg  string
 	}{
 		{
 			name:      "success when account belongs to project",
@@ -144,10 +144,10 @@ func TestValidateAccountService_ValidateAccountForProject(t *testing.T) {
 }
 
 func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(substr) == 0 || 
-		(len(s) > len(substr) && (s[:len(substr)] == substr || 
-		s[len(s)-len(substr):] == substr || 
-		containsSubstring(s, substr))))
+	return len(s) >= len(substr) && (s == substr || len(substr) == 0 ||
+		(len(s) > len(substr) && (s[:len(substr)] == substr ||
+			s[len(s)-len(substr):] == substr ||
+			containsSubstring(s, substr))))
 }
 
 func containsSubstring(s, substr string) bool {

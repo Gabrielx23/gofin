@@ -58,8 +58,8 @@ func TestTransactionInMemoryRepository_FutureTransactionFiltering(t *testing.T) 
 		{
 			name: "ExcludeFutureTransactions=true, no end date - should exclude future transactions",
 			query: models.TransactionQuery{
-				AccountID:                   &accountID,
-				ExcludeFutureTransactions:   true,
+				AccountID:                 &accountID,
+				ExcludeFutureTransactions: true,
 			},
 			expectedTransactionCount: 2,
 			expectedTransactionNames: []string{"Current Transaction", "Past Transaction"},
@@ -67,8 +67,8 @@ func TestTransactionInMemoryRepository_FutureTransactionFiltering(t *testing.T) 
 		{
 			name: "ExcludeFutureTransactions=false, no end date - should include all transactions",
 			query: models.TransactionQuery{
-				AccountID:                   &accountID,
-				ExcludeFutureTransactions:   false,
+				AccountID:                 &accountID,
+				ExcludeFutureTransactions: false,
 			},
 			expectedTransactionCount: 3,
 			expectedTransactionNames: []string{"Future Transaction", "Current Transaction", "Past Transaction"},
@@ -76,9 +76,9 @@ func TestTransactionInMemoryRepository_FutureTransactionFiltering(t *testing.T) 
 		{
 			name: "ExcludeFutureTransactions=true, with end date in future - should include future transactions",
 			query: models.TransactionQuery{
-				AccountID:                   &accountID,
-				EndDate:                     &futureTime,
-				ExcludeFutureTransactions:   true,
+				AccountID:                 &accountID,
+				EndDate:                   &futureTime,
+				ExcludeFutureTransactions: true,
 			},
 			expectedTransactionCount: 3,
 			expectedTransactionNames: []string{"Future Transaction", "Current Transaction", "Past Transaction"},
@@ -86,9 +86,9 @@ func TestTransactionInMemoryRepository_FutureTransactionFiltering(t *testing.T) 
 		{
 			name: "ExcludeFutureTransactions=false, with end date in past - should exclude future transactions",
 			query: models.TransactionQuery{
-				AccountID:                   &accountID,
-				EndDate:                     &now,
-				ExcludeFutureTransactions:   false,
+				AccountID:                 &accountID,
+				EndDate:                   &now,
+				ExcludeFutureTransactions: false,
 			},
 			expectedTransactionCount: 2,
 			expectedTransactionNames: []string{"Current Transaction", "Past Transaction"},

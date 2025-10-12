@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"gofin/internal/cases/create_access"
+	"gofin/internal/cases/create_account"
 	"gofin/internal/cases/create_project"
 	"gofin/internal/cases/create_transaction"
 	"gofin/internal/infrastructure/database"
@@ -19,6 +20,7 @@ type Container struct {
 	TransactionRepository    models.TransactionRepository
 	CreateProjectService     *create_project.CreateProjectService
 	CreateAccessService      *create_access.CreateAccessService
+	CreateAccountService     *create_account.CreateAccountService
 	CreateTransactionService *create_transaction.CreateTransactionService
 	DB                       database.Database
 }
@@ -35,6 +37,7 @@ func NewContainer(dbPath string) (*Container, error) {
 	transactionRepo := database.NewTransactionSqliteRepository(db.GetConnection())
 	createProjectService := create_project.NewCreateProjectService(projectRepo)
 	createAccessService := create_access.NewCreateAccessService(accessRepo, projectRepo)
+	createAccountService := create_account.NewCreateAccountService(accountRepo)
 	createTransactionService := create_transaction.NewCreateTransactionService(transactionRepo, accountRepo, projectRepo)
 
 	return &Container{
@@ -44,6 +47,7 @@ func NewContainer(dbPath string) (*Container, error) {
 		TransactionRepository:    transactionRepo,
 		CreateProjectService:     createProjectService,
 		CreateAccessService:      createAccessService,
+		CreateAccountService:     createAccountService,
 		CreateTransactionService: createTransactionService,
 		DB:                       db,
 	}, nil
