@@ -114,6 +114,19 @@ func (r *TransactionInMemoryRepository) isTransactionInDateRange(transaction *mo
 	return true
 }
 
+func (r *TransactionInMemoryRepository) isTransactionInDateRangeWithFutureFilter(transaction *models.Transaction, startDate, endDate *time.Time, excludeFuture bool) bool {
+	if startDate != nil && transaction.TransactionDate.Before(*startDate) {
+		return false
+	}
+	if endDate != nil && transaction.TransactionDate.After(*endDate) {
+		return false
+	}
+	if excludeFuture && endDate == nil && transaction.TransactionDate.After(time.Now()) {
+		return false
+	}
+	return true
+}
+
 func (r *TransactionInMemoryRepository) GetTransactionsWithFilters(query models.TransactionQuery) ([]*models.Transaction, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -134,12 +147,12 @@ func (r *TransactionInMemoryRepository) GetTransactionsWithFilters(query models.
 
 func (r *TransactionInMemoryRepository) matchesFilters(transaction *models.Transaction, query models.TransactionQuery) bool {
 	if query.ProjectID != nil {
-		return r.isTransactionInDateRange(transaction, query.StartDate, query.EndDate)
+		return r.isTransactionInDateRangeWithFutureFilter(transaction, query.StartDate, query.EndDate, query.ExcludeFutureTransactions)
 	}
 
 	if query.AccountID != nil && transaction.AccountID != *query.AccountID {
 		return false
 	}
 
-	return r.isTransactionInDateRange(transaction, query.StartDate, query.EndDate)
+	return r.isTransactionInDateRangeWithFutureFilter(transaction, query.StartDate, query.EndDate, query.ExcludeFutureTransactions)
 }

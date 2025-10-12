@@ -3,25 +3,26 @@ package handlers
 import (
 	"net/http"
 
-	"gofin/cmd/web/middleware"
+	"gofin/internal/container"
+	webcontext "gofin/pkg/web"
+	webpkg "gofin/pkg/web"
 	"gofin/pkg/session"
-	"gofin/web"
 )
 
-type LogoutHandler struct{}
+type LogoutHandler struct {
+	container *container.Container
+}
 
-func NewLogoutHandler() *LogoutHandler {
-	return &LogoutHandler{}
+func NewLogoutHandler(container *container.Container) *LogoutHandler {
+	return &LogoutHandler{
+		container: container,
+	}
 }
 
 func (h *LogoutHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	projectSlug, ok := middleware.GetProjectSlugFromContext(r.Context())
-	if !ok {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
+	project, _ := webcontext.GetProject(r.Context())
 
 	session.ClearSessionCookie(w)
 
-	http.Redirect(w, r, "/"+projectSlug+web.RouteLogin, http.StatusSeeOther)
+	webpkg.RedirectToProjectLogin(w, r, project.Slug)
 }

@@ -6,7 +6,14 @@ import (
 	"net/http"
 
 	"gofin/internal/container"
+	webhelpers "gofin/pkg/web"
 	"gofin/web"
+)
+
+const (
+	loginTemplateFile = "login.html"
+	loginBodyClass    = "login-page"
+	loginTitle        = "Login"
 )
 
 type LoginComponent struct {
@@ -17,7 +24,7 @@ type LoginComponent struct {
 func NewLoginComponent(container *container.Container) (*LoginComponent, error) {
 	tmpl, err := template.ParseFiles(
 		web.BaseTemplate,
-		web.GetTemplatePath("login.html"),
+		webhelpers.GetTemplatePath(loginTemplateFile),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse login template: %w", err)
@@ -36,8 +43,8 @@ func (c *LoginComponent) RenderLoginPage(w http.ResponseWriter, r *http.Request,
 		ProjectSlug string
 		ErrorMsg    string
 	}{
-		Title:       "Login",
-		BodyClass:   "login-page",
+		Title:       loginTitle,
+		BodyClass:   loginBodyClass,
 		ProjectSlug: projectSlug,
 		ErrorMsg:    errorMsg,
 	}

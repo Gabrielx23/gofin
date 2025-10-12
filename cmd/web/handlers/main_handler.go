@@ -3,37 +3,31 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/google/uuid"
-	"gofin/cmd/web/middleware"
+	"gofin/internal/container"
+	webcontext "gofin/pkg/web"
+	webpkg "gofin/pkg/web"
 	"gofin/web"
 )
 
-type MainHandler struct{}
+type MainHandler struct {
+	container *container.Container
+}
 
-func NewMainHandler() *MainHandler {
-	return &MainHandler{}
+func NewMainHandler(container *container.Container) *MainHandler {
+	return &MainHandler{
+		container: container,
+	}
 }
 
 func (h *MainHandler) Handle(w http.ResponseWriter, req *http.Request) {
-	projectID, ok := middleware.GetProjectIDFromContext(req.Context())
-
-	if !ok || projectID == uuid.Nil {
-		http.NotFound(w, req)
-		return
-	}
-
-	projectSlug, ok := middleware.GetProjectSlugFromContext(req.Context())
-	if !ok {
-		http.Error(w, web.ProjectSlugNotFoundError, http.StatusInternalServerError)
-		return
-	}
+	project, _ := webcontext.GetProject(req.Context())
 
 	cookie, err := req.Cookie(web.SessionTokenCookie)
 
 	if err != nil || cookie.Value == web.EmptyString {
-		http.Redirect(w, req, "/"+projectSlug+web.RouteLogin, http.StatusSeeOther)
+		webpkg.RedirectToProjectLogin(w, req, project.Slug)
 		return
 	}
 
-	http.Redirect(w, req, "/"+projectSlug+web.RouteDashboard, http.StatusSeeOther)
+	webpkg.RedirectToProjectDashboard(w, req, project.Slug)
 }

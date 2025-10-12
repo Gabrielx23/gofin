@@ -63,31 +63,42 @@ type TransactionRepository interface {
 	GetTransactionsWithFilters(query TransactionQuery) ([]*Transaction, error)
 }
 
-func NewTransaction(data TransactionData) *Transaction {
-	now := time.Now()
-	transactionDate := now
-	if data.TransactionDate != nil {
-		transactionDate = *data.TransactionDate
-	}
-
-	return &Transaction{
-		ID:              uuid.New(),
-		AccountID:       data.AccountID,
-		Value:           data.Value,
-		Name:            data.Name,
-		TransactionDate: transactionDate,
-		Type:            data.Type,
-		GroupID:         nil,
-		CreatedAt:       now,
-		UpdatedAt:       now,
-	}
+type TransactionQuery struct {
+	ProjectID           *uuid.UUID
+	AccountID           *uuid.UUID
+	StartDate           *time.Time
+	EndDate             *time.Time
+	ExcludeFutureTransactions bool
 }
 
-func NewGroupedTransaction(data TransactionData, groupID uuid.UUID) *Transaction {
+func (q *TransactionQuery) Validate() error {
+	if q.ProjectID == nil && q.AccountID == nil {
+		return fmt.Errorf("either project_id or account_id must be provided")
+	}
+
+	if q.ProjectID != nil && q.AccountID != nil {
+		return fmt.Errorf("cannot specify both project_id and account_id")
+	}
+
+	if q.StartDate != nil && q.EndDate != nil {
+		if q.EndDate.Before(*q.StartDate) {
+			return fmt.Errorf("end_date cannot be before start_date")
+		}
+	}
+
+	return nil
+}
+
+func NewTransaction(data TransactionData, groupID ...uuid.UUID) *Transaction {
 	now := time.Now()
 	transactionDate := now
 	if data.TransactionDate != nil {
 		transactionDate = *data.TransactionDate
+	}
+
+	var groupIDPtr *uuid.UUID
+	if len(groupID) > 0 {
+		groupIDPtr = &groupID[0]
 	}
 
 	return &Transaction{
@@ -97,7 +108,7 @@ func NewGroupedTransaction(data TransactionData, groupID uuid.UUID) *Transaction
 		Name:            data.Name,
 		TransactionDate: transactionDate,
 		Type:            data.Type,
-		GroupID:         &groupID,
+		GroupID:         groupIDPtr,
 		CreatedAt:       now,
 		UpdatedAt:       now,
 	}

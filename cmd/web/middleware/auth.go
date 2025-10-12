@@ -1,20 +1,21 @@
 package middleware
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
+	webcontext "gofin/pkg/web"
+	webpkg "gofin/pkg/web"
 	"gofin/internal/container"
 	"gofin/pkg/session"
 	"gofin/web"
 )
 
 func AuthRequired(container *container.Container, sessionManager *session.SessionManager) func(http.HandlerFunc) http.HandlerFunc {
-	return func(next http.HandlerFunc) http.HandlerFunc {
+		return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			projectID, ok := GetProjectIDFromContext(r.Context())
+			project, ok := webcontext.GetProject(r.Context())
 			if !ok {
 				http.Error(w, web.ProjectIDNotFoundError, http.StatusInternalServerError)
 				return
@@ -22,30 +23,31 @@ func AuthRequired(container *container.Container, sessionManager *session.Sessio
 
 			sessionToken, err := getSessionTokenFromCookie(r)
 			if err != nil {
-				redirectToLogin(w, r)
+				redirectToLogin(w, r, container)
 				return
 			}
 
 			token, valid := sessionManager.ValidateSessionToken(sessionToken)
 			if !valid {
 				clearInvalidCookie(w)
-				redirectToLogin(w, r)
+				redirectToLogin(w, r, container)
 				return
 			}
 
-			if token.ProjectID != projectID.String() {
+			if token.ProjectID != project.ID.String() {
 				clearInvalidCookie(w)
-				redirectToLogin(w, r)
+				redirectToLogin(w, r, container)
 				return
 			}
 
-			if !validateAccessID(container, projectID, token.AccessID) {
+			access, err := container.AccessRepository.GetByID(uuid.MustParse(token.AccessID))
+			if err != nil || access.ProjectID != project.ID {
 				clearInvalidCookie(w)
-				redirectToLogin(w, r)
+				redirectToLogin(w, r, container)
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), web.ContextAccessID, token.AccessID)
+			ctx := webcontext.SetAccess(r.Context(), access)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 	}
@@ -64,35 +66,19 @@ func getSessionTokenFromCookie(r *http.Request) (string, error) {
 	return cookie.Value, nil
 }
 
-func redirectToLogin(w http.ResponseWriter, r *http.Request) {
-	projectSlug, ok := GetProjectSlugFromContext(r.Context())
+func redirectToLogin(w http.ResponseWriter, r *http.Request, container *container.Container) {
+	project, ok := webcontext.GetProject(r.Context())
 	if !ok {
-		http.Error(w, web.ProjectSlugNotFoundError, http.StatusInternalServerError)
+		http.Error(w, web.ProjectIDNotFoundError, http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(w, r, "/"+projectSlug+web.RouteLogin, http.StatusSeeOther)
+	webpkg.RedirectToProjectLogin(w, r, project.Slug)
 }
 
-func GetAccessIDFromContext(ctx context.Context) (string, bool) {
-	accessID, ok := ctx.Value(web.ContextAccessID).(string)
-	return accessID, ok
-}
 
-func validateAccessID(container *container.Container, projectID uuid.UUID, accessID string) bool {
-	accessUUID, err := uuid.Parse(accessID)
-	if err != nil {
-		return false
-	}
-
-	access, err := container.AccessRepository.GetByID(accessUUID)
-	if err != nil {
-		return false
-	}
-
-	return access.ProjectID == projectID
-}
 
 func clearInvalidCookie(w http.ResponseWriter) {
 	session.ClearSessionCookie(w)
 }
+

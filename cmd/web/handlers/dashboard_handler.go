@@ -3,8 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/google/uuid"
-	"gofin/cmd/web/middleware"
+	webcontext "gofin/pkg/web"
 	"gofin/internal/container"
 	"gofin/web"
 	"gofin/web/components"
@@ -23,35 +22,9 @@ func NewDashboardHandler(container *container.Container, dashboardComponent *com
 }
 
 func (h *DashboardHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	projectID, ok := middleware.GetProjectIDFromContext(r.Context())
-	if !ok {
-		http.Error(w, web.ProjectIDNotFoundError, http.StatusInternalServerError)
-		return
-	}
+	project, _ := webcontext.GetProject(r.Context())
+	access, _ := webcontext.GetAccess(r.Context())
 
-	projectSlug, ok := middleware.GetProjectSlugFromContext(r.Context())
-	if !ok {
-		http.Error(w, web.ProjectSlugNotFoundError, http.StatusInternalServerError)
-		return
-	}
-
-	accessID, ok := middleware.GetAccessIDFromContext(r.Context())
-	if !ok {
-		http.Error(w, web.AccessIDNotFoundError, http.StatusInternalServerError)
-		return
-	}
-
-	project, err := h.container.ProjectRepository.GetByID(projectID)
-	if err != nil {
-		http.Error(w, web.ProjectNotFoundError, http.StatusNotFound)
-		return
-	}
-
-	access, err := h.container.AccessRepository.GetByID(uuid.MustParse(accessID))
-	if err != nil {
-		http.Error(w, web.AccessNotFoundError, http.StatusNotFound)
-		return
-	}
-
-	h.dashboardComponent.RenderDashboard(w, r, project, access, projectSlug)
+	successMsg := r.URL.Query().Get(web.SuccessQueryParam)
+	h.dashboardComponent.RenderDashboard(w, r, project, access, project.Slug, successMsg)
 }

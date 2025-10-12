@@ -5,11 +5,8 @@ import (
 	"path/filepath"
 
 	"gofin/internal/cases/create_access"
-	"gofin/internal/cases/create_account"
 	"gofin/internal/cases/create_project"
 	"gofin/internal/cases/create_transaction"
-	"gofin/internal/cases/get_project_balance"
-	"gofin/internal/cases/get_transactions"
 	"gofin/internal/infrastructure/database"
 	"gofin/internal/models"
 	"gofin/web"
@@ -22,10 +19,7 @@ type Container struct {
 	TransactionRepository    models.TransactionRepository
 	CreateProjectService     *create_project.CreateProjectService
 	CreateAccessService      *create_access.CreateAccessService
-	CreateAccountService     *create_account.CreateAccountService
 	CreateTransactionService *create_transaction.CreateTransactionService
-	GetProjectBalanceService *get_project_balance.GetProjectBalanceService
-	GetTransactionsService   *get_transactions.GetTransactionsService
 	DB                       database.Database
 }
 
@@ -41,10 +35,7 @@ func NewContainer(dbPath string) (*Container, error) {
 	transactionRepo := database.NewTransactionSqliteRepository(db.GetConnection())
 	createProjectService := create_project.NewCreateProjectService(projectRepo)
 	createAccessService := create_access.NewCreateAccessService(accessRepo, projectRepo)
-	createAccountService := create_account.NewCreateAccountService(accountRepo, projectRepo)
-	createTransactionService := create_transaction.NewCreateTransactionService(transactionRepo, accountRepo)
-	getProjectBalanceService := get_project_balance.NewGetProjectBalanceService(transactionRepo, accountRepo, projectRepo)
-	getTransactionsService := get_transactions.NewGetTransactionsService(transactionRepo, accountRepo, projectRepo)
+	createTransactionService := create_transaction.NewCreateTransactionService(transactionRepo, accountRepo, projectRepo)
 
 	return &Container{
 		ProjectRepository:        projectRepo,
@@ -53,10 +44,7 @@ func NewContainer(dbPath string) (*Container, error) {
 		TransactionRepository:    transactionRepo,
 		CreateProjectService:     createProjectService,
 		CreateAccessService:      createAccessService,
-		CreateAccountService:     createAccountService,
 		CreateTransactionService: createTransactionService,
-		GetProjectBalanceService: getProjectBalanceService,
-		GetTransactionsService:   getTransactionsService,
 		DB:                       db,
 	}, nil
 }

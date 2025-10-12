@@ -1,0 +1,75 @@
+{{define "content"}}
+<div class="header">
+    <h1>Create Transaction</h1>
+    <div class="header-info">
+        <a href="/{{.ProjectSlug}}/dashboard">
+            <button class="logout-button">Back to Dashboard</button>
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="welcome-card">
+        <h2>Create New Transaction</h2>
+        <p>Add one or more transactions to your project.</p>
+
+        {{if .ErrorMsg}}
+        <div class="error-message">{{.ErrorMsg}}</div>
+        {{end}}
+
+        <div id="account-options" style="display: none;">
+            {{range .Accounts}}<option value="{{.ID}}">{{.Name}} ({{.Currency}})</option>{{end}}
+        </div>
+
+        <form id="transactionForm" method="POST" x-data="transactionForm()">
+            <div id="transactionGroups">
+                <div class="transaction-group" data-template="true" style="display: none;">
+                    <div class="transaction-group-header">
+                        <h3>Transaction</h3>
+                        <button type="button" class="remove-group-btn">Remove</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="name_template">Name *</label>
+                        <input type="text" id="name_template" name="groups[template].name"
+                            placeholder="Transaction name">
+                    </div>
+                    <div class="form-group">
+                        <label for="value_template">Value *</label>
+                        <input type="number" id="value_template" name="groups[template].value" step="0.01" min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="type_template">Type *</label>
+                        <select id="type_template" name="groups[template].type">
+                            <option value="">Select type</option>
+                            <option value="debit" selected>Debit</option>
+                            <option value="top-up">Top Up</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="account_template">Account *</label>
+                        <select id="account_template" name="groups[template].account_id">
+                            <option value="">Select account</option>
+                            {{range .Accounts}}
+                            <option value="{{.ID}}">{{.Name}} ({{.Currency}})</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date_template">Date</label>
+                        <input type="datetime-local" id="date_template" name="groups[template].date"
+                            value="{{.DefaultDate}}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button type="button" class="create-transaction-button secondary" @click="addGroup()">Add Another
+                    Transaction</button>
+                <button type="submit" class="create-transaction-button primary">Create Transactions</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/static/js/transaction-form.js"></script>
+{{end}}

@@ -1,10 +1,11 @@
 package web
 
 const (
-	RouteLogin     = "/login"
-	RouteLogout    = "/logout"
-	RouteDashboard = "/dashboard"
-	RouteStatic    = "/static/*"
+	RouteLogin                = "/login"
+	RouteLogout               = "/logout"
+	RouteDashboard            = "/dashboard"
+	RouteCreateTransaction    = "/transactions/create"
+	RouteStatic               = "/static/*"
 
 	TemplatesDir = "web/templates"
 	BaseTemplate = "web/templates/base.html"
@@ -28,9 +29,14 @@ const (
 	ProjectNotFoundError     = "Project not found"
 	AccessNotFoundError      = "Access not found"
 
+	SuccessTransactionsCreated = "Transactions created successfully!"
+	SuccessLoginSuccessful     = "Login successful!"
+
+	SuccessKeyTransactionsCreated = "transactions_created"
+	SuccessKeyLoginSuccessful     = "login_successful"
+
+	SuccessQueryParam = "success"
+
 	StaticDir = "web/static"
 )
 
-func GetTemplatePath(filename string) string {
-	return TemplatesDir + "/" + filename
-}

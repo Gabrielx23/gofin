@@ -288,6 +288,11 @@ func (r *TransactionSqliteRepository) GetTransactionsWithFilters(query models.Tr
 		args = append(args, *query.EndDate)
 	}
 
+	if query.ExcludeFutureTransactions && query.EndDate == nil {
+		baseQuery += " AND t.transaction_date <= ?"
+		args = append(args, time.Now())
+	}
+
 	baseQuery += " ORDER BY t.transaction_date DESC"
 
 	rows, err := r.db.Query(baseQuery, args...)

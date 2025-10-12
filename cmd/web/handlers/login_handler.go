@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"gofin/cmd/web/middleware"
 	"gofin/internal/container"
 	"gofin/pkg/password"
 	"gofin/pkg/session"
+	webpkg "gofin/pkg/web"
 	"gofin/web"
 	"gofin/web/components"
 )
@@ -29,37 +29,27 @@ func NewLoginHandler(container *container.Container, loginComponent *components.
 }
 
 func (h *LoginHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	projectID, ok := middleware.GetProjectIDFromContext(r.Context())
-	if !ok {
-		http.Error(w, web.ProjectIDNotFoundError, http.StatusInternalServerError)
-		return
-	}
-
-	projectSlug, ok := middleware.GetProjectSlugFromContext(r.Context())
-	if !ok {
-		http.Error(w, web.ProjectSlugNotFoundError, http.StatusInternalServerError)
-		return
-	}
+	project, _ := webpkg.GetProject(r.Context())
 
 	if r.Method == http.MethodGet {
 		cookie, err := r.Cookie(web.SessionTokenCookie)
 		if err != nil || cookie.Value == web.EmptyString {
-			h.loginComponent.RenderLoginPage(w, r, projectSlug, web.EmptyString)
+			h.loginComponent.RenderLoginPage(w, r, project.Slug, web.EmptyString)
 			return
 		}
 
 		token, valid := h.sessionManager.ValidateSessionToken(cookie.Value)
-		if !valid || token.ProjectID != projectID.String() {
-			h.loginComponent.RenderLoginPage(w, r, projectSlug, web.EmptyString)
+		if !valid || token.ProjectID != project.ID.String() {
+			h.loginComponent.RenderLoginPage(w, r, project.Slug, web.EmptyString)
 			return
 		}
 
-		http.Redirect(w, r, "/"+projectSlug+web.RouteDashboard, http.StatusSeeOther)
+		webpkg.RedirectWithSuccess(w, r, "/"+project.Slug+web.RouteDashboard, web.SuccessKeyLoginSuccessful)
 		return
 	}
 
 	if r.Method == http.MethodPost {
-		h.handleLoginPost(w, r, projectID, projectSlug)
+		h.handleLoginPost(w, r, project.ID, project.Slug)
 		return
 	}
 
@@ -100,7 +90,7 @@ func (h *LoginHandler) handleLoginPost(w http.ResponseWriter, r *http.Request, p
 
 	session.SetSessionCookie(w, sessionToken)
 
-	http.Redirect(w, r, "/"+projectSlug+web.RouteDashboard, http.StatusSeeOther)
+	webpkg.RedirectWithSuccess(w, r, "/"+projectSlug+web.RouteDashboard, web.SuccessKeyLoginSuccessful)
 }
 
 func (h *LoginHandler) extractUID(r *http.Request) string {
