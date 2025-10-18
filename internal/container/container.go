@@ -9,22 +9,24 @@ import (
 	"gofin/internal/cases/create_project"
 	"gofin/internal/cases/create_transaction"
 	"gofin/internal/cases/get_project_balance"
+	"gofin/internal/cases/get_project_transactions"
 	"gofin/internal/infrastructure/database"
 	"gofin/internal/models"
 	"gofin/web"
 )
 
 type Container struct {
-	ProjectRepository        models.ProjectRepository
-	AccessRepository         models.AccessRepository
-	AccountRepository        models.AccountRepository
-	TransactionRepository    models.TransactionRepository
-	CreateProjectService     *create_project.CreateProjectService
-	CreateAccessService      *create_access.CreateAccessService
-	CreateAccountService     *create_account.CreateAccountService
-	CreateTransactionService *create_transaction.CreateTransactionService
-	GetProjectBalanceService *get_project_balance.GetProjectBalanceService
-	DB                       database.Database
+	ProjectRepository             models.ProjectRepository
+	AccessRepository              models.AccessRepository
+	AccountRepository             models.AccountRepository
+	TransactionRepository         models.TransactionRepository
+	CreateProjectService          *create_project.CreateProjectService
+	CreateAccessService           *create_access.CreateAccessService
+	CreateAccountService          *create_account.CreateAccountService
+	CreateTransactionService      *create_transaction.CreateTransactionService
+	GetProjectBalanceService      *get_project_balance.GetProjectBalanceService
+	GetProjectTransactionsService *get_project_transactions.GetProjectTransactionsService
+	DB                            database.Database
 }
 
 func NewContainer(dbPath string) (*Container, error) {
@@ -41,19 +43,21 @@ func NewContainer(dbPath string) (*Container, error) {
 	createAccessService := create_access.NewCreateAccessService(accessRepo, projectRepo)
 	createAccountService := create_account.NewCreateAccountService(accountRepo)
 	createTransactionService := create_transaction.NewCreateTransactionService(transactionRepo, accountRepo, projectRepo)
-	getProjectBalanceService := get_project_balance.NewGetProjectBalanceService(transactionRepo, accountRepo)
+	getProjectBalanceService := get_project_balance.NewGetProjectBalanceService(accountRepo)
+	getProjectTransactionsService := get_project_transactions.NewGetProjectTransactionsService(transactionRepo)
 
 	return &Container{
-		ProjectRepository:        projectRepo,
-		AccessRepository:         accessRepo,
-		AccountRepository:        accountRepo,
-		TransactionRepository:    transactionRepo,
-		CreateProjectService:     createProjectService,
-		CreateAccessService:      createAccessService,
-		CreateAccountService:     createAccountService,
-		CreateTransactionService: createTransactionService,
-		GetProjectBalanceService: getProjectBalanceService,
-		DB:                       db,
+		ProjectRepository:             projectRepo,
+		AccessRepository:              accessRepo,
+		AccountRepository:             accountRepo,
+		TransactionRepository:         transactionRepo,
+		CreateProjectService:          createProjectService,
+		CreateAccessService:           createAccessService,
+		CreateAccountService:          createAccountService,
+		CreateTransactionService:      createTransactionService,
+		GetProjectBalanceService:      getProjectBalanceService,
+		GetProjectTransactionsService: getProjectTransactionsService,
+		DB:                            db,
 	}, nil
 }
 

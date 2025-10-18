@@ -79,6 +79,32 @@
             </div>
             {{end}}
         </div>
+
+        <div class="transactions-section">
+            <h3>Transactions{{if .SelectedMonth}} ({{printf "%02d" .SelectedMonth}}/{{.SelectedYear}}){{else}}
+                ({{.SelectedYear}}){{end}}</h3>
+            {{if .Transactions}}
+            <div class="transactions-list">
+                {{range .Transactions}}
+                <div class="transaction-row">
+                    <div class="transaction-left">
+                        <div class="transaction-account">{{.AccountName}}</div>
+                        <div class="transaction-date">{{.TransactionDate}}</div>
+                    </div>
+                    <div class="transaction-right">
+                        <div class="transaction-value {{if .IsDebit}}debit-value{{else}}topup-value{{end}}">
+                            {{.FormattedValue}}</div>
+                        <div class="transaction-name">{{.Name}}</div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <div class="no-transactions">
+                <span>No transactions found for the selected period</span>
+            </div>
+            {{end}}
+        </div>
     </div>
 </div>
 {{end}}

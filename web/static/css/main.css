@@ -750,6 +750,98 @@ body.dashboard-page {
     margin-bottom: 2rem;
 }
 
+.transactions-section {
+    margin-top: 2rem;
+}
+
+.transactions-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.transactions-list {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.transaction-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e1e5e9;
+    transition: box-shadow 0.2s ease;
+}
+
+.transaction-row:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-row:last-child {
+    margin-bottom: 0;
+}
+
+.transaction-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.transaction-account {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.transaction-date {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.transaction-right {
+    text-align: right;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.transaction-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.debit-value {
+    color: #dc3545;
+}
+
+.topup-value {
+    color: #28a745;
+}
+
+.transaction-name {
+    color: #666;
+    font-size: 0.85rem;
+    max-width: 200px;
+    word-wrap: break-word;
+}
+
+.no-transactions {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
 @media (max-width: 768px) {
     .transaction-group {
         padding: 1.5rem;
@@ -848,5 +940,47 @@ body.dashboard-page {
         width: 95%;
         max-width: 400px;
         padding: 1.5rem;
+    }
+
+    .transaction-row {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .transaction-left {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .transaction-right {
+        text-align: right;
+        margin-left: 0.5rem;
+        flex-shrink: 0;
+        min-width: 120px;
+    }
+
+    .transaction-name {
+        max-width: 120px;
+        word-wrap: break-word;
+        text-align: right;
+    }
+
+    .transaction-value {
+        font-size: 1rem;
+    }
+
+    .transaction-account {
+        font-size: 0.9rem;
+    }
+
+    .transaction-date {
+        font-size: 0.8rem;
+    }
+
+    .transactions-list {
+        max-height: 50vh;
+        padding: 0.75rem;
     }
 }

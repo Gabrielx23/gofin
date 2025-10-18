@@ -29,8 +29,20 @@ func (h *DashboardHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	successMsg := r.URL.Query().Get(web.SuccessQueryParam)
 	year, month := h.parseAndValidateFilterParams(r)
-	
-	h.dashboardComponent.RenderDashboard(w, r, project, access, project.Slug, successMsg, year, month)
+
+	transactions, err := h.container.GetProjectTransactionsService.GetProjectTransactions(project.ID, year, month)
+	if err != nil {
+		http.Error(w, "Failed to get project transactions", http.StatusInternalServerError)
+		return
+	}
+
+	balanceData, err := h.container.GetProjectBalanceService.GetProjectBalancesFromTransactions(project.ID, transactions)
+	if err != nil {
+		http.Error(w, "Failed to get project balances", http.StatusInternalServerError)
+		return
+	}
+
+	h.dashboardComponent.RenderDashboard(w, r, project, access, project.Slug, successMsg, year, month, transactions, balanceData)
 }
 
 func (h *DashboardHandler) parseAndValidateFilterParams(r *http.Request) (int, int) {
@@ -47,7 +59,7 @@ func (h *DashboardHandler) parseYear(yearStr string) int {
 	defaultYear := time.Now().Year()
 	minYear := defaultYear - 10
 	maxYear := defaultYear + 10
-	
+
 	if yearStr == "" {
 		return defaultYear
 	}
@@ -65,8 +77,8 @@ func (h *DashboardHandler) parseYear(yearStr string) int {
 }
 
 func (h *DashboardHandler) parseMonth(monthStr string) int {
-	defaultMonth := 0
-	
+	defaultMonth := int(time.Now().Month())
+
 	if monthStr == "" {
 		return defaultMonth
 	}

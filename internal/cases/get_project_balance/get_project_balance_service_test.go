@@ -10,10 +10,9 @@ import (
 	"gofin/pkg/money"
 )
 
-func TestGetProjectBalanceService_GetProjectBalances(t *testing.T) {
+func TestGetProjectBalanceService_GetProjectBalancesFromTransactions(t *testing.T) {
 	accountRepo := database.NewAccountInMemoryRepository()
-	transactionRepo := database.NewTransactionInMemoryRepository()
-	service := NewGetProjectBalanceService(transactionRepo, accountRepo)
+	service := NewGetProjectBalanceService(accountRepo)
 
 	projectID := uuid.New()
 	account1 := models.NewAccount(projectID, "Savings", money.PLN)
@@ -50,11 +49,9 @@ func TestGetProjectBalanceService_GetProjectBalances(t *testing.T) {
 		Type:            models.TopUp,
 	}, uuid.New())
 
-	transactionRepo.Create(transaction1)
-	transactionRepo.Create(transaction2)
-	transactionRepo.Create(transaction3)
+	transactions := []*models.Transaction{transaction1, transaction2, transaction3}
 
-	result, err := service.GetProjectBalances(projectID, time.Now().Year(), 0)
+	result, err := service.GetProjectBalancesFromTransactions(projectID, transactions)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
@@ -114,14 +111,14 @@ func TestGetProjectBalanceService_GetProjectBalances(t *testing.T) {
 	}
 }
 
-func TestGetProjectBalanceService_GetProjectBalances_EmptyProject(t *testing.T) {
+func TestGetProjectBalanceService_GetProjectBalancesFromTransactions_EmptyProject(t *testing.T) {
 	accountRepo := database.NewAccountInMemoryRepository()
-	transactionRepo := database.NewTransactionInMemoryRepository()
-	service := NewGetProjectBalanceService(transactionRepo, accountRepo)
+	service := NewGetProjectBalanceService(accountRepo)
 
 	projectID := uuid.New()
+	transactions := []*models.Transaction{}
 
-	result, err := service.GetProjectBalances(projectID, time.Now().Year(), 0)
+	result, err := service.GetProjectBalancesFromTransactions(projectID, transactions)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
@@ -136,46 +133,5 @@ func TestGetProjectBalanceService_GetProjectBalances_EmptyProject(t *testing.T) 
 
 	if len(result.CurrencyTotals) != 0 {
 		t.Errorf("Expected 0 currency totals, got %d", len(result.CurrencyTotals))
-	}
-}
-
-func TestGetProjectBalanceService_FormatBalance(t *testing.T) {
-	accountRepo := database.NewAccountInMemoryRepository()
-	transactionRepo := database.NewTransactionInMemoryRepository()
-	service := NewGetProjectBalanceService(transactionRepo, accountRepo)
-
-	tests := []struct {
-		name     string
-		balance  float64
-		currency string
-		expected string
-	}{
-		{
-			name:     "Positive balance",
-			balance:  123.45,
-			currency: "PLN",
-			expected: "123.45 PLN",
-		},
-		{
-			name:     "Negative balance",
-			balance:  -67.89,
-			currency: "EUR",
-			expected: "-67.89 EUR",
-		},
-		{
-			name:     "Zero balance",
-			balance:  0.0,
-			currency: "USD",
-			expected: "0.00 USD",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := service.FormatBalance(tt.balance, tt.currency)
-			if result != tt.expected {
-				t.Errorf("Expected %s, got %s", tt.expected, result)
-			}
-		})
 	}
 }
