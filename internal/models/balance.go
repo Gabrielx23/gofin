@@ -19,6 +19,12 @@ type ProjectBalanceSummary struct {
 	Summaries []AccountSummary `json:"summaries"`
 }
 
+type CurrencyTotal struct {
+	Currency   string  `json:"currency"`
+	Balance    float64 `json:"balance"`
+	IsPositive bool    `json:"is_positive"`
+}
+
 type BalanceQuery struct {
 	ProjectID *uuid.UUID
 	AccountID *uuid.UUID

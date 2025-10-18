@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"time"
 
 	"gofin/internal/container"
 	"gofin/internal/models"
@@ -22,6 +23,13 @@ type AccountBalanceDisplay struct {
 	Balance    string
 	IsPositive bool
 }
+
+type CurrencyTotalDisplay struct {
+	Currency   string
+	Balance    string
+	IsPositive bool
+}
+
 
 type DashboardComponent struct {
 	container *container.Container
@@ -43,10 +51,10 @@ func NewDashboardComponent(container *container.Container) (*DashboardComponent,
 	}, nil
 }
 
-func (c *DashboardComponent) RenderDashboard(w http.ResponseWriter, r *http.Request, project *models.Project, access *models.Access, projectSlug, successKey string) {
+func (c *DashboardComponent) RenderDashboard(w http.ResponseWriter, r *http.Request, project *models.Project, access *models.Access, projectSlug, successKey string, year, month int) {
 	successMessage := c.getSuccessMessage(successKey)
 
-	balanceData, err := c.container.GetProjectBalanceService.GetProjectBalances(project.ID)
+	balanceData, err := c.container.GetProjectBalanceService.GetProjectBalances(project.ID, year, month)
 	if err != nil {
 		http.Error(w, "Failed to get project balances", http.StatusInternalServerError)
 		return
@@ -62,6 +70,11 @@ func (c *DashboardComponent) RenderDashboard(w http.ResponseWriter, r *http.Requ
 		ReadOnly        bool
 		SuccessMsg      string
 		AccountBalances []AccountBalanceDisplay
+		CurrencyTotals  []CurrencyTotalDisplay
+		SelectedYear    int
+		SelectedMonth   int
+		Years           []int
+		Months          []int
 	}{
 		Title:           project.Name,
 		BodyClass:       dashboardBodyClass,
@@ -72,6 +85,11 @@ func (c *DashboardComponent) RenderDashboard(w http.ResponseWriter, r *http.Requ
 		ReadOnly:        access.ReadOnly,
 		SuccessMsg:      successMessage,
 		AccountBalances: c.formatAccountBalances(balanceData.AccountBalances),
+		CurrencyTotals:  c.formatCurrencyTotals(balanceData.CurrencyTotals),
+		SelectedYear:    year,
+		SelectedMonth:   month,
+		Years:           c.getYears(),
+		Months:          c.getMonths(),
 	}
 
 	if err := c.template.Execute(w, data); err != nil {
@@ -95,10 +113,7 @@ func (c *DashboardComponent) formatAccountBalances(balances []models.AccountSumm
 	var displayBalances []AccountBalanceDisplay
 
 	for _, balance := range balances {
-		formattedBalance := c.container.GetProjectBalanceService.FormatBalance(
-			balance.Balance,
-			balance.Currency,
-		)
+		formattedBalance := c.formatBalance(balance.Balance, balance.Currency)
 
 		displayBalances = append(displayBalances, AccountBalanceDisplay{
 			Name:       balance.Name,
@@ -109,3 +124,38 @@ func (c *DashboardComponent) formatAccountBalances(balances []models.AccountSumm
 
 	return displayBalances
 }
+
+func (c *DashboardComponent) formatBalance(balance float64, currency string) string {
+	return fmt.Sprintf("%.2f %s", balance, currency)
+}
+
+func (c *DashboardComponent) formatCurrencyTotals(currencyTotals []models.CurrencyTotal) []CurrencyTotalDisplay {
+	var displayTotals []CurrencyTotalDisplay
+
+	for _, total := range currencyTotals {
+		formattedBalance := c.formatBalance(total.Balance, total.Currency)
+
+		displayTotals = append(displayTotals, CurrencyTotalDisplay{
+			Currency:   total.Currency,
+			Balance:    formattedBalance,
+			IsPositive: total.IsPositive,
+		})
+	}
+
+	return displayTotals
+}
+
+
+func (c *DashboardComponent) getYears() []int {
+	currentYear := time.Now().Year()
+	years := make([]int, 0, 11)
+	for year := currentYear - 5; year <= currentYear+5; year++ {
+		years = append(years, year)
+	}
+	return years
+}
+
+func (c *DashboardComponent) getMonths() []int {
+	return []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+}
+

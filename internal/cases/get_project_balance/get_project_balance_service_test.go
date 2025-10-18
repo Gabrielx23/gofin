@@ -54,7 +54,7 @@ func TestGetProjectBalanceService_GetProjectBalances(t *testing.T) {
 	transactionRepo.Create(transaction2)
 	transactionRepo.Create(transaction3)
 
-	result, err := service.GetProjectBalances(projectID)
+	result, err := service.GetProjectBalances(projectID, time.Now().Year(), 0)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
@@ -87,6 +87,31 @@ func TestGetProjectBalanceService_GetProjectBalances(t *testing.T) {
 	if checkingBalance.Currency != "EUR" {
 		t.Errorf("Expected checking currency EUR, got %s", checkingBalance.Currency)
 	}
+
+	if len(result.CurrencyTotals) != 2 {
+		t.Fatalf("Expected 2 currency totals, got %d", len(result.CurrencyTotals))
+	}
+
+	currencyTotals := make(map[string]models.CurrencyTotal)
+	for _, total := range result.CurrencyTotals {
+		currencyTotals[total.Currency] = total
+	}
+
+	plnTotal := currencyTotals["PLN"]
+	if plnTotal.Balance != 70.0 {
+		t.Errorf("Expected PLN total 70.0, got %.2f", plnTotal.Balance)
+	}
+	if !plnTotal.IsPositive {
+		t.Errorf("Expected PLN total to be positive")
+	}
+
+	eurTotal := currencyTotals["EUR"]
+	if eurTotal.Balance != 200.0 {
+		t.Errorf("Expected EUR total 200.0, got %.2f", eurTotal.Balance)
+	}
+	if !eurTotal.IsPositive {
+		t.Errorf("Expected EUR total to be positive")
+	}
 }
 
 func TestGetProjectBalanceService_GetProjectBalances_EmptyProject(t *testing.T) {
@@ -96,7 +121,7 @@ func TestGetProjectBalanceService_GetProjectBalances_EmptyProject(t *testing.T) 
 
 	projectID := uuid.New()
 
-	result, err := service.GetProjectBalances(projectID)
+	result, err := service.GetProjectBalances(projectID, time.Now().Year(), 0)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
@@ -107,6 +132,10 @@ func TestGetProjectBalanceService_GetProjectBalances_EmptyProject(t *testing.T) 
 
 	if len(result.AccountBalances) != 0 {
 		t.Errorf("Expected 0 account balances, got %d", len(result.AccountBalances))
+	}
+
+	if len(result.CurrencyTotals) != 0 {
+		t.Errorf("Expected 0 currency totals, got %d", len(result.CurrencyTotals))
 	}
 }
 

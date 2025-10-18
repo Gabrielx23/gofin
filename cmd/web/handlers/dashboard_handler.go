@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
+	"time"
 
 	"gofin/internal/container"
 	webcontext "gofin/pkg/web"
@@ -26,5 +28,57 @@ func (h *DashboardHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	access, _ := webcontext.GetAccess(r.Context())
 
 	successMsg := r.URL.Query().Get(web.SuccessQueryParam)
-	h.dashboardComponent.RenderDashboard(w, r, project, access, project.Slug, successMsg)
+	year, month := h.parseAndValidateFilterParams(r)
+	
+	h.dashboardComponent.RenderDashboard(w, r, project, access, project.Slug, successMsg, year, month)
+}
+
+func (h *DashboardHandler) parseAndValidateFilterParams(r *http.Request) (int, int) {
+	yearStr := r.URL.Query().Get("year")
+	monthStr := r.URL.Query().Get("month")
+
+	year := h.parseYear(yearStr)
+	month := h.parseMonth(monthStr)
+
+	return year, month
+}
+
+func (h *DashboardHandler) parseYear(yearStr string) int {
+	defaultYear := time.Now().Year()
+	minYear := defaultYear - 10
+	maxYear := defaultYear + 10
+	
+	if yearStr == "" {
+		return defaultYear
+	}
+
+	parsedYear, err := strconv.Atoi(yearStr)
+	if err != nil {
+		return defaultYear
+	}
+
+	if parsedYear < minYear || parsedYear > maxYear {
+		return defaultYear
+	}
+
+	return parsedYear
+}
+
+func (h *DashboardHandler) parseMonth(monthStr string) int {
+	defaultMonth := 0
+	
+	if monthStr == "" {
+		return defaultMonth
+	}
+
+	parsedMonth, err := strconv.Atoi(monthStr)
+	if err != nil {
+		return defaultMonth
+	}
+
+	if parsedMonth < 1 || parsedMonth > 12 {
+		return defaultMonth
+	}
+
+	return parsedMonth
 }

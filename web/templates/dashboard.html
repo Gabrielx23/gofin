@@ -20,19 +20,55 @@
         <p>Below you can see project balances and history.
         </p>
 
-        {{if not .ReadOnly}}
+        <div class="dashboard-controls">
+            {{if not .ReadOnly}}
+            <a href="/{{.ProjectSlug}}/transactions/create">
+                <button class="create-transaction-button">Create Transaction</button>
+            </a>
+            {{end}}
 
-        <a href="/{{.ProjectSlug}}/transactions/create">
-            <button class="create-transaction-button">Create Transaction</button>
-        </a>
-        {{end}}
+            <form method="GET" class="filter-form">
+                <div class="filter-inputs">
+                    <div class="filter-group">
+                        <label for="year">Year:</label>
+                        <select name="year" id="year" required>
+                            {{range .Years}}
+                            <option value="{{.}}" {{if eq . $.SelectedYear}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="month">Month (optional):</label>
+                        <select name="month" id="month">
+                            <option value="">All months</option>
+                            {{range .Months}}
+                            <option value="{{.}}" {{if eq . $.SelectedMonth}}selected{{end}}>{{printf "%02d" .}}
+                            </option>
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="filter-button">Filter</button>
+                </div>
+            </form>
+        </div>
 
         <div class="project-details">
-            <h3>Balances</h3>
+            <h3>Balances{{if .SelectedMonth}} ({{printf "%02d" .SelectedMonth}}/{{.SelectedYear}}){{else}}
+                ({{.SelectedYear}}){{end}}</h3>
             {{if .AccountBalances}}
             {{range .AccountBalances}}
             <div class="detail-row">
                 <span class="detail-label">{{.Name}}:</span>
+                <span
+                    class="detail-value {{if .IsPositive}}positive-balance{{else}}negative-balance{{end}}">{{.Balance}}</span>
+            </div>
+            {{end}}
+            <hr class="balance-separator">
+            {{range .CurrencyTotals}}
+            <div class="detail-row total-balance-row">
+                <span class="detail-label">Total {{.Currency}}:</span>
                 <span
                     class="detail-value {{if .IsPositive}}positive-balance{{else}}negative-balance{{end}}">{{.Balance}}</span>
             </div>
