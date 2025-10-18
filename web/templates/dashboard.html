@@ -1,110 +1,120 @@
 {{define "content"}}
-{{if .SuccessMsg}}
-<div class="success-message">{{.SuccessMsg}}</div>
-{{end}}
-<div class="header">
-    <h1>{{.ProjectName}}</h1>
-    <div class="header-info">
-        <div class="user-info">
-            <strong>{{.AccessName}}</strong> 👋
-        </div>
-        <a href="/{{.ProjectSlug}}/logout">
-            <button class="logout-button">Logout</button>
-        </a>
-    </div>
-</div>
-
-<div class="main-content">
-    <div class="welcome-card">
-        <h2>{{.ProjectName}}</h2>
-        <p>Below you can see project balances and history.
-        </p>
-
-        <div class="dashboard-controls">
-            {{if not .ReadOnly}}
-            <a href="/{{.ProjectSlug}}/transactions/create">
-                <button class="create-transaction-button">Create Transaction</button>
+<div x-data="dashboard" x-init="deleteRoute = '{{.RouteDeleteTransaction}}'; projectSlug = '{{.ProjectSlug}}'">
+    {{if .SuccessMsg}}
+    <div class="success-message">{{.SuccessMsg}}</div>
+    {{end}}
+    <div class="header">
+        <h1>{{.ProjectName}}</h1>
+        <div class="header-info">
+            <div class="user-info">
+                <strong>{{.AccessName}}</strong> 👋
+            </div>
+            <a href="/{{.ProjectSlug}}/logout">
+                <button class="logout-button">Logout</button>
             </a>
-            {{end}}
+        </div>
+    </div>
 
-            <form method="GET" class="filter-form">
-                <div class="filter-inputs">
-                    <div class="filter-group">
-                        <label for="year">Year:</label>
-                        <select name="year" id="year" required>
-                            {{range .Years}}
-                            <option value="{{.}}" {{if eq . $.SelectedYear}}selected{{end}}>{{.}}</option>
-                            {{end}}
-                        </select>
+    <div class="main-content">
+        <div class="welcome-card">
+            <h2>{{.ProjectName}}</h2>
+            <p>Below you can see project balances and history.
+            </p>
+
+            <div class="dashboard-controls">
+                {{if not .ReadOnly}}
+                <a href="/{{.ProjectSlug}}/transactions/create">
+                    <button class="create-transaction-button">Create Transaction</button>
+                </a>
+                {{end}}
+
+                <form method="GET" class="filter-form">
+                    <div class="filter-inputs">
+                        <div class="filter-group">
+                            <label for="year">Year:</label>
+                            <select name="year" id="year" required>
+                                {{range .Years}}
+                                <option value="{{.}}" {{if eq . $.SelectedYear}}selected{{end}}>{{.}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="month">Month (optional):</label>
+                            <select name="month" id="month">
+                                <option value="">All months</option>
+                                {{range .Months}}
+                                <option value="{{.}}" {{if eq . $.SelectedMonth}}selected{{end}}>{{printf "%02d" .}}
+                                </option>
+                                {{end}}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="filter-button">Filter</button>
                     </div>
+                </form>
+            </div>
 
-                    <div class="filter-group">
-                        <label for="month">Month (optional):</label>
-                        <select name="month" id="month">
-                            <option value="">All months</option>
-                            {{range .Months}}
-                            <option value="{{.}}" {{if eq . $.SelectedMonth}}selected{{end}}>{{printf "%02d" .}}
-                            </option>
-                            {{end}}
-                        </select>
-                    </div>
-
-                    <button type="submit" class="filter-button">Filter</button>
+            <div class="project-details">
+                <h3>Balances{{if .SelectedMonth}} ({{printf "%02d" .SelectedMonth}}/{{.SelectedYear}}){{else}}
+                    ({{.SelectedYear}}){{end}}</h3>
+                {{if .AccountBalances}}
+                {{range .AccountBalances}}
+                <div class="detail-row">
+                    <span class="detail-label">{{.Name}}:</span>
+                    <span
+                        class="detail-value {{if .IsPositive}}positive-balance{{else}}negative-balance{{end}}">{{.Balance}}</span>
                 </div>
-            </form>
-        </div>
-
-        <div class="project-details">
-            <h3>Balances{{if .SelectedMonth}} ({{printf "%02d" .SelectedMonth}}/{{.SelectedYear}}){{else}}
-                ({{.SelectedYear}}){{end}}</h3>
-            {{if .AccountBalances}}
-            {{range .AccountBalances}}
-            <div class="detail-row">
-                <span class="detail-label">{{.Name}}:</span>
-                <span
-                    class="detail-value {{if .IsPositive}}positive-balance{{else}}negative-balance{{end}}">{{.Balance}}</span>
-            </div>
-            {{end}}
-            <hr class="balance-separator">
-            {{range .CurrencyTotals}}
-            <div class="detail-row total-balance-row">
-                <span class="detail-label">Total {{.Currency}}:</span>
-                <span
-                    class="detail-value {{if .IsPositive}}positive-balance{{else}}negative-balance{{end}}">{{.Balance}}</span>
-            </div>
-            {{end}}
-            {{else}}
-            <div class="detail-row">
-                <span class="detail-label">No accounts found</span>
-            </div>
-            {{end}}
-        </div>
-
-        <div class="transactions-section">
-            <h3>Transactions{{if .SelectedMonth}} ({{printf "%02d" .SelectedMonth}}/{{.SelectedYear}}){{else}}
-                ({{.SelectedYear}}){{end}}</h3>
-            {{if .Transactions}}
-            <div class="transactions-list">
-                {{range .Transactions}}
-                <div class="transaction-row">
-                    <div class="transaction-left">
-                        <div class="transaction-account">{{.AccountName}}</div>
-                        <div class="transaction-date">{{.TransactionDate}}</div>
-                    </div>
-                    <div class="transaction-right">
-                        <div class="transaction-value {{if .IsDebit}}debit-value{{else}}topup-value{{end}}">
-                            {{.FormattedValue}}</div>
-                        <div class="transaction-name">{{.Name}}</div>
-                    </div>
+                {{end}}
+                <hr class="balance-separator">
+                {{range .CurrencyTotals}}
+                <div class="detail-row total-balance-row">
+                    <span class="detail-label">Total {{.Currency}}:</span>
+                    <span
+                        class="detail-value {{if .IsPositive}}positive-balance{{else}}negative-balance{{end}}">{{.Balance}}</span>
+                </div>
+                {{end}}
+                {{else}}
+                <div class="detail-row">
+                    <span class="detail-label">No accounts found</span>
                 </div>
                 {{end}}
             </div>
-            {{else}}
-            <div class="no-transactions">
-                <span>No transactions found for the selected period</span>
+
+            <div class="transactions-section">
+                <h3>Transactions{{if .SelectedMonth}} ({{printf "%02d" .SelectedMonth}}/{{.SelectedYear}}){{else}}
+                    ({{.SelectedYear}}){{end}}</h3>
+                {{if .Transactions}}
+                <div class="transactions-list">
+                    {{range .Transactions}}
+                    <div class="transaction-row">
+                        <div class="transaction-left">
+                            <div class="transaction-account">{{.AccountName}}</div>
+                            <div class="transaction-date">{{.TransactionDate}}</div>
+                        </div>
+                        <div class="transaction-right">
+                            <div class="transaction-value {{if .IsDebit}}debit-value{{else}}topup-value{{end}}">
+                                {{.FormattedValue}}</div>
+                            <div class="transaction-name">{{.Name}}</div>
+                            {{if not $.ReadOnly}}
+                            <div class="transaction-actions">
+                                <button class="delete-transaction-btn" @click="deleteTransaction('{{.ID}}')"
+                                    title="Delete transaction">🗑️</button>
+                            </div>
+                            {{end}}
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <div class="no-transactions">
+                    <span>No transactions found for the selected period</span>
+                </div>
+                {{end}}
             </div>
-            {{end}}
         </div>
     </div>
 </div>
+
+<script src="/static/js/dashboard.js"></script>
 {{end}}

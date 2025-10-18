@@ -8,6 +8,7 @@ import (
 	"gofin/internal/cases/create_account"
 	"gofin/internal/cases/create_project"
 	"gofin/internal/cases/create_transaction"
+	"gofin/internal/cases/delete_transaction"
 	"gofin/internal/cases/get_project_balance"
 	"gofin/internal/cases/get_project_transactions"
 	"gofin/internal/infrastructure/database"
@@ -24,6 +25,7 @@ type Container struct {
 	CreateAccessService           *create_access.CreateAccessService
 	CreateAccountService          *create_account.CreateAccountService
 	CreateTransactionService      *create_transaction.CreateTransactionService
+	DeleteTransactionService      *delete_transaction.DeleteTransactionService
 	GetProjectBalanceService      *get_project_balance.GetProjectBalanceService
 	GetProjectTransactionsService *get_project_transactions.GetProjectTransactionsService
 	DB                            database.Database
@@ -43,6 +45,7 @@ func NewContainer(dbPath string) (*Container, error) {
 	createAccessService := create_access.NewCreateAccessService(accessRepo, projectRepo)
 	createAccountService := create_account.NewCreateAccountService(accountRepo)
 	createTransactionService := create_transaction.NewCreateTransactionService(transactionRepo, accountRepo, projectRepo)
+	deleteTransactionService := delete_transaction.NewDeleteTransactionService(transactionRepo)
 	getProjectBalanceService := get_project_balance.NewGetProjectBalanceService(accountRepo)
 	getProjectTransactionsService := get_project_transactions.NewGetProjectTransactionsService(transactionRepo)
 
@@ -55,6 +58,7 @@ func NewContainer(dbPath string) (*Container, error) {
 		CreateAccessService:           createAccessService,
 		CreateAccountService:          createAccountService,
 		CreateTransactionService:      createTransactionService,
+		DeleteTransactionService:      deleteTransactionService,
 		GetProjectBalanceService:      getProjectBalanceService,
 		GetProjectTransactionsService: getProjectTransactionsService,
 		DB:                            db,

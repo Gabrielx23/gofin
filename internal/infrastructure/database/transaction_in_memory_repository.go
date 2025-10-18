@@ -156,3 +156,17 @@ func (r *TransactionInMemoryRepository) matchesFilters(transaction *models.Trans
 
 	return r.isTransactionInDateRangeWithFutureFilter(transaction, query.StartDate, query.EndDate, query.ExcludeFutureTransactions)
 }
+
+func (r *TransactionInMemoryRepository) DeleteByID(id uuid.UUID) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for key, transaction := range r.transactions {
+		if transaction.ID == id {
+			delete(r.transactions, key)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("transaction not found")
+}

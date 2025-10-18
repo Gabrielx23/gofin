@@ -5,6 +5,7 @@ const (
 	RouteLogout            = "/logout"
 	RouteDashboard         = "/dashboard"
 	RouteCreateTransaction = "/transactions/create"
+	RouteDeleteTransaction = "/transactions/delete"
 	RouteCreateAccount     = "/accounts/create"
 	RouteStatic            = "/static/*"
 
@@ -32,9 +33,11 @@ const (
 
 	SuccessTransactionsCreated = "Transactions created successfully!"
 	SuccessLoginSuccessful     = "Login successful!"
+	SuccessTransactionDeleted  = "Transaction deleted successfully!"
 
 	SuccessKeyTransactionsCreated = "transactions_created"
 	SuccessKeyLoginSuccessful     = "login_successful"
+	SuccessKeyTransactionDeleted  = "transaction_deleted"
 
 	SuccessQueryParam = "success"
 

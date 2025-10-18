@@ -61,6 +61,7 @@ type TransactionRepository interface {
 	GetByAccountIDWithDateRange(accountID uuid.UUID, startDate, endDate *time.Time) ([]*Transaction, error)
 	GetByProjectIDWithDateRange(projectID uuid.UUID, startDate, endDate *time.Time) ([]*Transaction, error)
 	GetTransactionsWithFilters(query TransactionQuery) ([]*Transaction, error)
+	DeleteByID(id uuid.UUID) error
 }
 
 type TransactionQuery struct {

@@ -173,6 +173,26 @@ func (r *TransactionSqliteRepository) scanTransaction(scanner interface {
 	}, nil
 }
 
+func (r *TransactionSqliteRepository) DeleteByID(id uuid.UUID) error {
+	query := `DELETE FROM transactions WHERE id = ?`
+
+	result, err := r.db.Exec(query, id.String())
+	if err != nil {
+		return fmt.Errorf("failed to delete transaction: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("transaction not found")
+	}
+
+	return nil
+}
+
 func (r *TransactionSqliteRepository) GetByAccountIDWithDateRange(accountID uuid.UUID, startDate, endDate *time.Time) ([]*models.Transaction, error) {
 	query := `
 		SELECT t.id, t.account_id, t.value, t.name, t.transaction_date, t.type, t.group_id, t.created_at, t.updated_at
@@ -257,6 +277,7 @@ func (r *TransactionSqliteRepository) GetByProjectIDWithDateRange(projectID uuid
 
 	return transactions, nil
 }
+
 func (r *TransactionSqliteRepository) GetTransactionsWithFilters(query models.TransactionQuery) ([]*models.Transaction, error) {
 	var baseQuery string
 	var args []interface{}

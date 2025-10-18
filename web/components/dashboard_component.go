@@ -68,37 +68,39 @@ func (c *DashboardComponent) RenderDashboard(w http.ResponseWriter, r *http.Requ
 	successMessage := c.getSuccessMessage(successKey)
 
 	data := struct {
-		Title           string
-		BodyClass       string
-		ProjectID       string
-		ProjectSlug     string
-		ProjectName     string
-		AccessName      string
-		ReadOnly        bool
-		SuccessMsg      string
-		AccountBalances []AccountBalanceDisplay
-		CurrencyTotals  []CurrencyTotalDisplay
-		Transactions    []TransactionDisplay
-		SelectedYear    int
-		SelectedMonth   int
-		Years           []int
-		Months          []int
+		Title                  string
+		BodyClass              string
+		ProjectID              string
+		ProjectSlug            string
+		ProjectName            string
+		AccessName             string
+		ReadOnly               bool
+		SuccessMsg             string
+		AccountBalances        []AccountBalanceDisplay
+		CurrencyTotals         []CurrencyTotalDisplay
+		Transactions           []TransactionDisplay
+		SelectedYear           int
+		SelectedMonth          int
+		Years                  []int
+		Months                 []int
+		RouteDeleteTransaction string
 	}{
-		Title:           project.Name,
-		BodyClass:       dashboardBodyClass,
-		ProjectID:       project.ID.String(),
-		ProjectSlug:     projectSlug,
-		ProjectName:     project.Name,
-		AccessName:      access.Name,
-		ReadOnly:        access.ReadOnly,
-		SuccessMsg:      successMessage,
-		AccountBalances: c.formatAccountBalances(balanceData.AccountBalances),
-		CurrencyTotals:  c.formatCurrencyTotals(balanceData.CurrencyTotals),
-		Transactions:    c.formatTransactions(transactions),
-		SelectedYear:    year,
-		SelectedMonth:   month,
-		Years:           c.getYears(),
-		Months:          c.getMonths(),
+		Title:                  project.Name,
+		BodyClass:              dashboardBodyClass,
+		ProjectID:              project.ID.String(),
+		ProjectSlug:            projectSlug,
+		ProjectName:            project.Name,
+		AccessName:             access.Name,
+		ReadOnly:               access.ReadOnly,
+		SuccessMsg:             successMessage,
+		AccountBalances:        c.formatAccountBalances(balanceData.AccountBalances),
+		CurrencyTotals:         c.formatCurrencyTotals(balanceData.CurrencyTotals),
+		Transactions:           c.formatTransactions(transactions),
+		SelectedYear:           year,
+		SelectedMonth:          month,
+		Years:                  c.getYears(),
+		Months:                 c.getMonths(),
+		RouteDeleteTransaction: web.RouteDeleteTransaction,
 	}
 
 	if err := c.template.Execute(w, data); err != nil {
@@ -110,6 +112,7 @@ func (c *DashboardComponent) getSuccessMessage(successKey string) string {
 	successMessages := map[string]string{
 		web.SuccessKeyTransactionsCreated: web.SuccessTransactionsCreated,
 		web.SuccessKeyLoginSuccessful:     web.SuccessLoginSuccessful,
+		web.SuccessKeyTransactionDeleted:  web.SuccessTransactionDeleted,
 	}
 
 	if message, exists := successMessages[successKey]; exists {
